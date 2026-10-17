@@ -3,13 +3,30 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Authenticated Founderbrain workspace API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: workspaces
+  - name: dashboard
+  - name: projects
+  - name: tasks
+  - name: goals
+  - name: activity
+  - name: teams
+  - name: founders
+  - name: community
+  - name: portfolio
+  - name: mentorship
+  - name: assistants
+  - name: fundraising
+  - name: notifications
+  - name: settings
+security:
+  - bearerAuth: []
 paths:
   /healthz:
     get:
@@ -17,6 +34,7 @@ paths:
       tags: [health]
       summary: Health check
       description: Returns server health status
+      security: []
       responses:
         "200":
           description: Healthy
@@ -24,13 +42,2697 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get the authenticated account
+      responses:
+        "200":
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+  /workspaces:
+    get:
+      operationId: listWorkspaces
+      tags: [workspaces]
+      summary: List workspaces the authenticated user belongs to
+      responses:
+        "200":
+          description: Workspaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workspace"
+    post:
+      operationId: createWorkspace
+      tags: [workspaces]
+      summary: Create a workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceInput"
+      responses:
+        "201":
+          description: Created workspace
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get current workspace totals and progress
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List workspace projects
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{projectId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project
+      responses:
+        "204":
+          description: Deleted
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List workspace tasks
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: projectId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/TaskStatus"
+      responses:
+        "200":
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+  /tasks/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getTask
+      tags: [tasks]
+      summary: Get a task
+      responses:
+        "200":
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task
+      responses:
+        "204":
+          description: Deleted
+  /goals:
+    get:
+      operationId: listGoals
+      tags: [goals]
+      summary: List workspace goals
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+    post:
+      operationId: createGoal
+      tags: [goals]
+      summary: Create a goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalInput"
+      responses:
+        "201":
+          description: Created goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+  /goals/{goalId}:
+    parameters:
+      - name: goalId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getGoal
+      tags: [goals]
+      summary: Get a goal
+      responses:
+        "200":
+          description: Goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "404":
+          description: Goal not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateGoal
+      tags: [goals]
+      summary: Update a goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalUpdate"
+      responses:
+        "200":
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+    delete:
+      operationId: deleteGoal
+      tags: [goals]
+      summary: Delete a goal
+      responses:
+        "204":
+          description: Deleted
+  /activity:
+    get:
+      operationId: listRecentActivity
+      tags: [activity]
+      summary: Get recent workspace changes
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+  /workspaces/{workspaceId}/members:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listWorkspaceMembers
+      tags: [teams]
+      summary: List members of a workspace
+      responses:
+        "200":
+          description: Workspace members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkspaceMember"
+  /workspaces/{workspaceId}/members/{memberId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateWorkspaceMember
+      tags: [teams]
+      summary: Change a member's role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceMemberUpdate"
+      responses:
+        "200":
+          description: Updated member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMember"
+    delete:
+      operationId: removeWorkspaceMember
+      tags: [teams]
+      summary: Remove a member from a workspace
+      responses:
+        "204":
+          description: Member removed
+  /workspaces/{workspaceId}/invitations:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listWorkspaceInvitations
+      tags: [teams]
+      summary: List pending workspace invitations
+      responses:
+        "200":
+          description: Pending invitations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkspaceInvitation"
+    post:
+      operationId: createWorkspaceInvitation
+      tags: [teams]
+      summary: Create a copyable invitation link
+      description: Creates an invitation record only; no email or message is sent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceInvitationInput"
+      responses:
+        "201":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceInvitationCreated"
+  /workspaces/{workspaceId}/join-requests:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listWorkspaceJoinRequests
+      tags: [teams]
+      summary: List join requests for workspace admins
+      responses:
+        "200":
+          description: Workspace join requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkspaceJoinRequest"
+    post:
+      operationId: createWorkspaceJoinRequest
+      tags: [teams]
+      summary: Ask to join a workspace using its workspace ID
+      responses:
+        "201":
+          description: Join request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceJoinRequest"
+  /workspaces/{workspaceId}/join-requests/me:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getMyWorkspaceJoinRequest
+      tags: [teams]
+      summary: Get the authenticated user's join request for a workspace
+      responses:
+        "200":
+          description: Join request status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceJoinRequest"
+  /workspaces/{workspaceId}/join-requests/{requestId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateWorkspaceJoinRequest
+      tags: [teams]
+      summary: Approve or decline a workspace join request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceJoinRequestUpdate"
+      responses:
+        "200":
+          description: Updated join request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceJoinRequest"
+  /invitations/accept:
+    post:
+      operationId: acceptWorkspaceInvitation
+      tags: [teams]
+      summary: Accept a workspace invitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceInvitationAccept"
+      responses:
+        "200":
+          description: Joined workspace
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+  /founders:
+    get:
+      operationId: searchFounders
+      tags: [founders]
+      summary: Search founders who chose to be discoverable
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 80
+        - name: skill
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 60
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Discoverable founder profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FounderProfile"
+  /founders/me:
+    get:
+      operationId: getFounderProfile
+      tags: [founders]
+      summary: Get the authenticated founder's profile
+      responses:
+        "200":
+          description: Founder profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FounderProfile"
+  /founders/{founderId}/portfolio:
+    parameters:
+      - name: founderId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getFounderPortfolio
+      tags: [portfolio]
+      summary: Get a public founder portfolio
+      security: []
+      responses:
+        "200":
+          description: Public founder profile and achievements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FounderPortfolio"
+        "404":
+          description: Portfolio is private or does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Public portfolio data is not configured in the connected database
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateFounderProfile
+      tags: [founders]
+      summary: Update the authenticated founder's profile and privacy controls
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FounderProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FounderProfile"
+  /connections:
+    get:
+      operationId: listFounderConnections
+      tags: [founders]
+      summary: List incoming and outgoing connection requests
+      responses:
+        "200":
+          description: Connection requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FounderConnection"
+    post:
+      operationId: createFounderConnection
+      tags: [founders]
+      summary: Send an explicit founder connection request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FounderConnectionInput"
+      responses:
+        "201":
+          description: Connection request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FounderConnection"
+  /connections/{connectionId}:
+    parameters:
+      - name: connectionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateFounderConnection
+      tags: [founders]
+      summary: Accept or decline an incoming connection request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FounderConnectionUpdate"
+      responses:
+        "200":
+          description: Updated connection request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FounderConnection"
+    delete:
+      operationId: deleteFounderConnection
+      tags: [founders]
+      summary: Withdraw or remove a connection
+      responses:
+        "204":
+          description: Connection removed
+  /community/posts:
+    get:
+      operationId: listCommunityPosts
+      tags: [community]
+      summary: List community posts from authenticated founders
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Community posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommunityPost"
+    post:
+      operationId: createCommunityPost
+      tags: [community]
+      summary: Publish a founder-authored community post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunityPostInput"
+      responses:
+        "201":
+          description: Created post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityPost"
+  /community/posts/{postId}:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateCommunityPost
+      tags: [community]
+      summary: Edit an authored community post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunityPostUpdate"
+      responses:
+        "200":
+          description: Updated post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityPost"
+    delete:
+      operationId: deleteCommunityPost
+      tags: [community]
+      summary: Delete an authored community post
+      responses:
+        "204":
+          description: Post deleted
+  /community/posts/{postId}/comments:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listCommunityComments
+      tags: [community]
+      summary: List comments on a post
+      responses:
+        "200":
+          description: Post comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommunityComment"
+    post:
+      operationId: createCommunityComment
+      tags: [community]
+      summary: Comment on a community post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunityCommentInput"
+      responses:
+        "201":
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityComment"
+  /community/comments/{commentId}:
+    parameters:
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateCommunityComment
+      tags: [community]
+      summary: Edit an authored comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunityCommentUpdate"
+      responses:
+        "200":
+          description: Updated comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityComment"
+    delete:
+      operationId: deleteCommunityComment
+      tags: [community]
+      summary: Delete an authored comment
+      responses:
+        "204":
+          description: Comment deleted
+  /community/posts/{postId}/reaction:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      operationId: setCommunityReaction
+      tags: [community]
+      summary: Add or change the authenticated user's reaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunityReactionInput"
+      responses:
+        "200":
+          description: Updated reaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityReaction"
+    delete:
+      operationId: deleteCommunityReaction
+      tags: [community]
+      summary: Remove the authenticated user's reaction
+      responses:
+        "204":
+          description: Reaction removed
+  /portfolio/me/achievements:
+    get:
+      operationId: listMyAchievements
+      tags: [portfolio]
+      summary: List the authenticated founder's achievements
+      responses:
+        "200":
+          description: Achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+    post:
+      operationId: createAchievement
+      tags: [portfolio]
+      summary: Add an achievement to the founder's portfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AchievementInput"
+      responses:
+        "201":
+          description: Achievement created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Achievement"
+  /portfolio/achievements/{achievementId}:
+    parameters:
+      - name: achievementId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateAchievement
+      tags: [portfolio]
+      summary: Edit an authored achievement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AchievementUpdate"
+      responses:
+        "200":
+          description: Updated achievement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Achievement"
+    delete:
+      operationId: deleteAchievement
+      tags: [portfolio]
+      summary: Remove an authored achievement
+      responses:
+        "204":
+          description: Achievement deleted
+  /mentorship/questions:
+    get:
+      operationId: listMentorshipQuestions
+      tags: [mentorship]
+      summary: List founder mentorship questions
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Mentorship questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MentorshipQuestion"
+    post:
+      operationId: createMentorshipQuestion
+      tags: [mentorship]
+      summary: Ask a mentorship question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorshipQuestionInput"
+      responses:
+        "201":
+          description: Question created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorshipQuestion"
+  /mentorship/questions/{questionId}:
+    parameters:
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateMentorshipQuestion
+      tags: [mentorship]
+      summary: Edit an authored mentorship question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorshipQuestionUpdate"
+      responses:
+        "200":
+          description: Updated question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorshipQuestion"
+    delete:
+      operationId: deleteMentorshipQuestion
+      tags: [mentorship]
+      summary: Delete an authored mentorship question
+      responses:
+        "204":
+          description: Question deleted
+  /mentorship/questions/{questionId}/answers:
+    parameters:
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listMentorshipAnswers
+      tags: [mentorship]
+      summary: List answers to a mentorship question
+      responses:
+        "200":
+          description: Answers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MentorshipAnswer"
+    post:
+      operationId: createMentorshipAnswer
+      tags: [mentorship]
+      summary: Answer a mentorship question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorshipAnswerInput"
+      responses:
+        "201":
+          description: Answer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorshipAnswer"
+  /mentorship/answers/{answerId}:
+    parameters:
+      - name: answerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateMentorshipAnswer
+      tags: [mentorship]
+      summary: Edit an authored mentorship answer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorshipAnswerUpdate"
+      responses:
+        "200":
+          description: Updated answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorshipAnswer"
+    delete:
+      operationId: deleteMentorshipAnswer
+      tags: [mentorship]
+      summary: Delete an authored mentorship answer
+      responses:
+        "204":
+          description: Answer deleted
+  /mentorship/answers/{answerId}/accept:
+    parameters:
+      - name: answerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      operationId: acceptMentorshipAnswer
+      tags: [mentorship]
+      summary: Accept an answer to your question
+      responses:
+        "200":
+          description: Accepted answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorshipAnswer"
+  /mentorship/requests:
+    get:
+      operationId: listMentorshipRequests
+      tags: [mentorship]
+      summary: List incoming and outgoing mentorship requests
+      responses:
+        "200":
+          description: Mentorship requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MentorshipRequest"
+    post:
+      operationId: createMentorshipRequest
+      tags: [mentorship]
+      summary: Send a mentorship request to a founder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorshipRequestInput"
+      responses:
+        "201":
+          description: Request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorshipRequest"
+  /mentorship/requests/{requestId}:
+    parameters:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateMentorshipRequest
+      tags: [mentorship]
+      summary: Accept or decline an incoming mentorship request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorshipRequestUpdate"
+      responses:
+        "200":
+          description: Updated mentorship request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorshipRequest"
+  /assistants/runs:
+    get:
+      operationId: listAssistantRuns
+      tags: [assistants]
+      summary: List saved assistant outputs in a workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Saved assistant runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssistantRun"
+    post:
+      operationId: createAssistantRun
+      tags: [assistants]
+      summary: Generate and save a real AI startup assistant response
+      description: Requires a configured AI provider. No fake response is returned when unconfigured.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssistantRunInput"
+      responses:
+        "201":
+          description: Assistant output generated and saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssistantRun"
+        "503":
+          description: AI provider is not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /assistants/runs/{runId}:
+    parameters:
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      operationId: deleteAssistantRun
+      tags: [assistants]
+      summary: Delete a saved assistant run
+      responses:
+        "204":
+          description: Assistant run deleted
+  /workspaces/{workspaceId}/fundraising-stage:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getFundraisingStage
+      tags: [fundraising]
+      summary: Get the workspace's current fundraising stage
+      responses:
+        "200":
+          description: Fundraising stage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FundraisingStage"
+    put:
+      operationId: updateFundraisingStage
+      tags: [fundraising]
+      summary: Update the workspace's fundraising stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FundraisingStageInput"
+      responses:
+        "200":
+          description: Updated fundraising stage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FundraisingStage"
+  /workspaces/{workspaceId}/investors:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listInvestors
+      tags: [fundraising]
+      summary: List user-entered investor records for a workspace
+      responses:
+        "200":
+          description: Investor records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Investor"
+    post:
+      operationId: createInvestor
+      tags: [fundraising]
+      summary: Add an investor record entered by the workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestorInput"
+      responses:
+        "201":
+          description: Investor record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Investor"
+  /investors/{investorId}:
+    parameters:
+      - name: investorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateInvestor
+      tags: [fundraising]
+      summary: Update an investor record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestorUpdate"
+      responses:
+        "200":
+          description: Updated investor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Investor"
+    delete:
+      operationId: deleteInvestor
+      tags: [fundraising]
+      summary: Delete an investor record
+      responses:
+        "204":
+          description: Investor deleted
+  /investors/{investorId}/notes:
+    parameters:
+      - name: investorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listInvestorNotes
+      tags: [fundraising]
+      summary: List notes for an investor record
+      responses:
+        "200":
+          description: Investor notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InvestorNote"
+    post:
+      operationId: createInvestorNote
+      tags: [fundraising]
+      summary: Add a note to an investor record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestorNoteInput"
+      responses:
+        "201":
+          description: Investor note created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvestorNote"
+  /investor-notes/{noteId}:
+    parameters:
+      - name: noteId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateInvestorNote
+      tags: [fundraising]
+      summary: Edit an authored investor note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestorNoteUpdate"
+      responses:
+        "200":
+          description: Updated investor note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvestorNote"
+    delete:
+      operationId: deleteInvestorNote
+      tags: [fundraising]
+      summary: Delete an authored investor note
+      responses:
+        "204":
+          description: Investor note deleted
+  /investors/{investorId}/follow-ups:
+    parameters:
+      - name: investorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listInvestorFollowUps
+      tags: [fundraising]
+      summary: List follow-up tasks for an investor
+      responses:
+        "200":
+          description: Investor follow-up tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InvestorFollowUp"
+    post:
+      operationId: createInvestorFollowUp
+      tags: [fundraising]
+      summary: Create a follow-up task for an investor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestorFollowUpInput"
+      responses:
+        "201":
+          description: Follow-up task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvestorFollowUp"
+  /investor-follow-ups/{followUpId}:
+    parameters:
+      - name: followUpId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateInvestorFollowUp
+      tags: [fundraising]
+      summary: Update or complete an investor follow-up task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestorFollowUpUpdate"
+      responses:
+        "200":
+          description: Updated follow-up task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvestorFollowUp"
+    delete:
+      operationId: deleteInvestorFollowUp
+      tags: [fundraising]
+      summary: Delete an investor follow-up task
+      responses:
+        "204":
+          description: Follow-up task deleted
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List the authenticated user's notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+  /notifications/read-all:
+    put:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "204":
+          description: Notifications marked read
+  /notifications/{notificationId}/read:
+    parameters:
+      - name: notificationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark a notification as read
+      responses:
+        "200":
+          description: Updated notification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+  /settings:
+    get:
+      operationId: getUserSettings
+      tags: [settings]
+      summary: Read the authenticated user's notification and privacy settings
+      responses:
+        "200":
+          description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+    patch:
+      operationId: updateUserSettings
+      tags: [settings]
+      summary: Update the authenticated user's settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSettingsUpdate"
+      responses:
+        "200":
+          description: Updated user settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
-
+      required: [status]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    CurrentUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: ["string", "null"]
+        displayName:
+          type: ["string", "null"]
+      required: [id, email, displayName]
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        role:
+          type: string
+          enum: [owner, admin, member]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, role, createdAt]
+    WorkspaceInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required: [name]
+    ProjectStatus:
+      type: string
+      enum: [planning, active, on_hold, completed]
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+        targetDate:
+          type: ["string", "null"]
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, workspaceId, name, description, status, targetDate, createdAt, updatedAt]
+    ProjectInput:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+        targetDate:
+          type: ["string", "null"]
+          format: date
+      required: [workspaceId, name]
+    ProjectUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+        targetDate:
+          type: ["string", "null"]
+          format: date
+    TaskStatus:
+      type: string
+      enum: [todo, in_progress, blocked, done]
+    TaskPriority:
+      type: string
+      enum: [low, medium, high]
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        projectId:
+          type: ["string", "null"]
+          format: uuid
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        priority:
+          $ref: "#/components/schemas/TaskPriority"
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        assigneeId:
+          type: ["string", "null"]
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, workspaceId, projectId, title, description, status, priority, dueDate, assigneeId, createdAt, updatedAt]
+    TaskInput:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        projectId:
+          type: ["string", "null"]
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        priority:
+          $ref: "#/components/schemas/TaskPriority"
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        assigneeId:
+          type: ["string", "null"]
+          format: uuid
+      required: [workspaceId, title]
+    TaskUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        projectId:
+          type: ["string", "null"]
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        priority:
+          $ref: "#/components/schemas/TaskPriority"
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        assigneeId:
+          type: ["string", "null"]
+          format: uuid
+    GoalStatus:
+      type: string
+      enum: [active, paused, completed]
+    Goal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        targetValue:
+          type: ["number", "null"]
+        currentValue:
+          type: ["number", "null"]
+        metricLabel:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        status:
+          $ref: "#/components/schemas/GoalStatus"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, workspaceId, title, description, targetValue, currentValue, metricLabel, dueDate, status, createdAt, updatedAt]
+    GoalInput:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: ["string", "null"]
+        targetValue:
+          type: ["number", "null"]
+        currentValue:
+          type: ["number", "null"]
+        metricLabel:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        status:
+          $ref: "#/components/schemas/GoalStatus"
+      required: [workspaceId, title]
+    GoalUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: ["string", "null"]
+        targetValue:
+          type: ["number", "null"]
+        currentValue:
+          type: ["number", "null"]
+        metricLabel:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        status:
+          $ref: "#/components/schemas/GoalStatus"
+    DashboardSummary:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        activeProjects:
+          type: integer
+        openTasks:
+          type: integer
+        completedTasks:
+          type: integer
+        dueSoonTasks:
+          type: integer
+        overdueTasks:
+          type: integer
+        activeGoals:
+          type: integer
+        goalProgress:
+          type: ["number", "null"]
+      required: [workspaceId, activeProjects, openTasks, completedTasks, dueSoonTasks, overdueTasks, activeGoals, goalProgress]
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [project, task, goal]
+        title:
+          type: string
+        detail:
+          type: ["string", "null"]
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, kind, title, detail, updatedAt]
+    WorkspaceMember:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [owner, admin, member]
+        joinedAt:
+          type: string
+          format: date-time
+      required: [userId, displayName, role, joinedAt]
+    WorkspaceMemberUpdate:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [admin, member]
+      required: [role]
+    WorkspaceInvitation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        email:
+          type: ["string", "null"]
+          format: email
+        role:
+          type: string
+          enum: [admin, member]
+        status:
+          type: string
+          enum: [pending, accepted, expired, revoked]
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, workspaceId, email, role, status, expiresAt, createdAt]
+    WorkspaceInvitationInput:
+      type: object
+      properties:
+        email:
+          type: ["string", "null"]
+          format: email
+        role:
+          type: string
+          enum: [admin, member]
+      required: [role]
+    WorkspaceInvitationCreated:
+      type: object
+      properties:
+        invitation:
+          $ref: "#/components/schemas/WorkspaceInvitation"
+        token:
+          type: string
+          minLength: 32
+      required: [invitation, token]
+    WorkspaceInvitationAccept:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 32
+          maxLength: 256
+      required: [token]
+    WorkspaceJoinRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        requesterId:
+          type: string
+          format: uuid
+        requesterName:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted, declined]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, workspaceId, requesterId, requesterName, status, createdAt, updatedAt]
+    WorkspaceJoinRequestUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [accepted, declined]
+      required: [status]
+    FounderProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        headline:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        skills:
+          type: array
+          items:
+            type: string
+        location:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        stage:
+          type: ["string", "null"]
+        websiteUrl:
+          type: ["string", "null"]
+          format: uri
+        isDiscoverable:
+          type: boolean
+        portfolioIsPublic:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, displayName, headline, bio, skills, location, company, stage, websiteUrl, isDiscoverable, portfolioIsPublic, updatedAt]
+    FounderPortfolio:
+      type: object
+      properties:
+        profile:
+          $ref: "#/components/schemas/PublicFounderProfile"
+        achievements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Achievement"
+      required: [profile, achievements]
+    PublicFounderProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        headline:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        skills:
+          type: array
+          items:
+            type: string
+        location:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        stage:
+          type: ["string", "null"]
+        websiteUrl:
+          type: ["string", "null"]
+          format: uri
+      required: [id, displayName, headline, bio, skills, location, company, stage, websiteUrl]
+    FounderProfileUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        headline:
+          type: ["string", "null"]
+          maxLength: 140
+        bio:
+          type: ["string", "null"]
+          maxLength: 2000
+        skills:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+        location:
+          type: ["string", "null"]
+          maxLength: 120
+        company:
+          type: ["string", "null"]
+          maxLength: 120
+        stage:
+          type: ["string", "null"]
+          maxLength: 80
+        websiteUrl:
+          type: ["string", "null"]
+          format: uri
+        isDiscoverable:
+          type: boolean
+        portfolioIsPublic:
+          type: boolean
+    FounderConnection:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requesterId:
+          type: string
+          format: uuid
+        requesterName:
+          type: string
+        recipientId:
+          type: string
+          format: uuid
+        recipientName:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted, declined]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, requesterId, requesterName, recipientId, recipientName, status, createdAt, updatedAt]
+    FounderConnectionInput:
+      type: object
+      properties:
+        recipientId:
+          type: string
+          format: uuid
+      required: [recipientId]
+    FounderConnectionUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [accepted, declined]
+      required: [status]
+    CommunityPost:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorName:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        reactionCount:
+          type: integer
+        commentCount:
+          type: integer
+        viewerReaction:
+          type: ["string", "null"]
+          enum: [like, celebrate, support, null]
+      required: [id, authorId, authorName, content, createdAt, updatedAt, reactionCount, commentCount, viewerReaction]
+    CommunityPostInput:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+      required: [content]
+    CommunityPostUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+      required: [content]
+    CommunityComment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        postId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorName:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, postId, authorId, authorName, content, createdAt, updatedAt]
+    CommunityCommentInput:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required: [content]
+    CommunityCommentUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required: [content]
+    CommunityReaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        postId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        reaction:
+          type: string
+          enum: [like, celebrate, support]
+      required: [id, postId, userId, reaction]
+    CommunityReactionInput:
+      type: object
+      properties:
+        reaction:
+          type: string
+          enum: [like, celebrate, support]
+      required: [reaction]
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        externalUrl:
+          type: ["string", "null"]
+          format: uri
+        issuedOn:
+          type: ["string", "null"]
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, title, description, category, externalUrl, issuedOn, createdAt, updatedAt]
+    AchievementInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        category:
+          type: ["string", "null"]
+          maxLength: 80
+        externalUrl:
+          type: ["string", "null"]
+          format: uri
+        issuedOn:
+          type: ["string", "null"]
+          format: date
+      required: [title]
+    AchievementUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: ["string", "null"]
+          maxLength: 2000
+        category:
+          type: ["string", "null"]
+          maxLength: 80
+        externalUrl:
+          type: ["string", "null"]
+          format: uri
+        issuedOn:
+          type: ["string", "null"]
+          format: date
+    MentorshipQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorName:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        acceptedAnswerId:
+          type: ["string", "null"]
+          format: uuid
+        answerCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, authorId, authorName, title, body, tags, acceptedAnswerId, answerCount, createdAt, updatedAt]
+    MentorshipQuestionInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 180
+        body:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        tags:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+      required: [title, body]
+    MentorshipQuestionUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 180
+        body:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        tags:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+    MentorshipAnswer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        questionId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorName:
+          type: string
+        body:
+          type: string
+        accepted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, questionId, authorId, authorName, body, accepted, createdAt, updatedAt]
+    MentorshipAnswerInput:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 5000
+      required: [body]
+    MentorshipAnswerUpdate:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 5000
+      required: [body]
+    MentorshipRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+        senderName:
+          type: string
+        recipientId:
+          type: string
+          format: uuid
+        recipientName:
+          type: string
+        message:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted, declined]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, senderId, senderName, recipientId, recipientName, message, status, createdAt, updatedAt]
+    MentorshipRequestInput:
+      type: object
+      properties:
+        recipientId:
+          type: string
+          format: uuid
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required: [recipientId, message]
+    MentorshipRequestUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [accepted, declined]
+      required: [status]
+    AssistantKind:
+      type: string
+      enum: [idea_validation, business_plan, product_roadmap, pitch_prep]
+    AssistantRun:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        kind:
+          $ref: "#/components/schemas/AssistantKind"
+        prompt:
+          type: string
+        output:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, workspaceId, kind, prompt, output, createdAt]
+    AssistantRunInput:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        kind:
+          $ref: "#/components/schemas/AssistantKind"
+        prompt:
+          type: string
+          minLength: 20
+          maxLength: 8000
+      required: [workspaceId, kind, prompt]
+    FundraisingStage:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        stage:
+          type: string
+          enum: [idea, bootstrapped, pre_seed, seed, series_a, series_b_plus, other]
+        updatedAt:
+          type: string
+          format: date-time
+      required: [workspaceId, stage, updatedAt]
+    FundraisingStageInput:
+      type: object
+      properties:
+        stage:
+          type: string
+          enum: [idea, bootstrapped, pre_seed, seed, series_a, series_b_plus, other]
+      required: [stage]
+    Investor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        organization:
+          type: ["string", "null"]
+        websiteUrl:
+          type: ["string", "null"]
+          format: uri
+        pipelineStage:
+          type: string
+          enum: [researching, contacted, meeting, due_diligence, committed, passed]
+        sourceType:
+          type: string
+          enum: [user_entered]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, workspaceId, name, organization, websiteUrl, pipelineStage, sourceType, createdAt, updatedAt]
+    InvestorInput:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+        organization:
+          type: ["string", "null"]
+          maxLength: 160
+        websiteUrl:
+          type: ["string", "null"]
+          format: uri
+        pipelineStage:
+          type: string
+          enum: [researching, contacted, meeting, due_diligence, committed, passed]
+      required: [workspaceId, name]
+    InvestorUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+        organization:
+          type: ["string", "null"]
+          maxLength: 160
+        websiteUrl:
+          type: ["string", "null"]
+          format: uri
+        pipelineStage:
+          type: string
+          enum: [researching, contacted, meeting, due_diligence, committed, passed]
+    InvestorNote:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        investorId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, investorId, authorId, content, createdAt]
+    InvestorNoteInput:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 4000
+      required: [content]
+    InvestorNoteUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 4000
+      required: [content]
+    InvestorFollowUp:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        investorId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        status:
+          type: string
+          enum: [open, completed]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, investorId, title, dueDate, status, createdAt, updatedAt]
+    InvestorFollowUpInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        dueDate:
+          type: ["string", "null"]
+          format: date
+      required: [title]
+    InvestorFollowUpUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        status:
+          type: string
+          enum: [open, completed]
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum: [workspace_invite, workspace_join_request, workspace_join_update, connection_request, connection_update, community_comment, mentorship_request, mentorship_answer]
+        title:
+          type: string
+        body:
+          type: ["string", "null"]
+        resourcePath:
+          type: ["string", "null"]
+        readAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, kind, title, body, resourcePath, readAt, createdAt]
+    UserSettings:
+      type: object
+      properties:
+        communityNotifications:
+          type: boolean
+        connectionNotifications:
+          type: boolean
+        mentorshipNotifications:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+      required: [communityNotifications, connectionNotifications, mentorshipNotifications, updatedAt]
+    UserSettingsUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        communityNotifications:
+          type: boolean
+        connectionNotifications:
+          type: boolean
+        mentorshipNotifications:
+          type: boolean

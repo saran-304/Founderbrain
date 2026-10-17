@@ -1,8 +1,41 @@
 import { Router, type IRouter } from "express";
+import { requireSupabaseUser } from "../middlewares/supabase-auth";
+import activityRouter from "./activity";
+import accountRouter from "./account";
+import assistantsRouter from "./assistants";
+import authRouter from "./auth";
+import communityRouter from "./community";
+import dashboardRouter from "./dashboard";
+import foundersRouter from "./founders";
+import fundraisingRouter from "./fundraising";
+import goalsRouter from "./goals";
 import healthRouter from "./health";
+import mentorshipRouter from "./mentorship";
+import portfolioRouter, { publicPortfolioRouter } from "./portfolio";
+import projectsRouter from "./projects";
+import tasksRouter from "./tasks";
+import teamsRouter from "./teams";
+import workspacesRouter from "./workspaces";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(publicPortfolioRouter);
+router.use(requireSupabaseUser);
+router.use(authRouter);
+router.use(workspacesRouter);
+router.use(dashboardRouter);
+router.use(activityRouter);
+router.use(projectsRouter);
+router.use(tasksRouter);
+router.use(goalsRouter);
+router.use(teamsRouter);
+router.use(foundersRouter);
+router.use(communityRouter);
+router.use(portfolioRouter);
+router.use(mentorshipRouter);
+router.use(assistantsRouter);
+router.use(fundraisingRouter);
+router.use(accountRouter);
 
 export default router;

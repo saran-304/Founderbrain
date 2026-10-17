@@ -1,0 +1,143 @@
+# FounderBrain — Continue My Existing Project From Where It Stopped
+
+## 1. My situation
+
+I created a **new Replit profile/account because I ran out of credits in my old Replit account**. I uploaded my existing FounderBrain project folder into this new Replit account.
+
+This uploaded folder contains my existing source code and project work. I want to continue building the same application from where development stopped.
+
+**Your job is to continue my existing project, not create a new project.**
+
+Work directly inside the current Replit workspace containing the uploaded FounderBrain files. Do not depend on access to my old Replit account.
+
+## 2. First, understand the existing project
+
+Before making changes:
+
+1. Inspect the actual project files, folder structure, Git history if available, package configuration, documentation, environment configuration, database migrations, and existing application routes.
+2. Identify the current technology stack and how the frontend, backend, Supabase, authentication, and AI integrations work.
+3. Determine which features are already implemented, which are partially implemented, and which are still missing.
+4. Identify the last completed development stage from the actual code and documentation.
+5. Run the existing build, typecheck, and available tests to establish the current baseline.
+6. Create or verify a backup and check the Git working tree before modifying files.
+
+Do not assume that reports from my old Replit account accurately describe the uploaded project. Verify everything against the current files.
+
+If important files are missing, explain exactly what is missing and why it matters. Do not fabricate previous progress or pretend to have access to the old account.
+
+## 3. Continue FounderBrain from its current state
+
+FounderBrain is my **AI Startup OS SaaS platform**. Its purpose is to bring the essential tools for building and managing a startup into one connected platform.
+
+Preserve the existing application architecture, branding, UI/UX, design system, reusable components, routes, and working functionality.
+
+My planned modules include:
+
+- **My Work:** Dashboard, goals, projects, tasks, activity, and progress.
+- **AI Agents:** AI assistance for legitimate, authenticated founder workflows.
+- **Founders:** Founder discovery, profiles, and co-founder connections.
+- **Teams:** Create teams, invite members, join teams, and manage roles.
+- **Community:** Share startup updates, achievements, and useful information.
+- **Portfolio:** Founder profiles, projects, skills, and achievements.
+- **Investors:** Investor discovery and relevant startup fundraising information.
+- **Mentorship:** Questions, answers, and mentor-related features.
+- **Authentication and Settings:** Secure accounts, profiles, notifications, and preferences.
+
+These are the intended product capabilities, not a claim that every module already exists. Check the code before deciding what needs to be built.
+
+## 4. Fix and finish the existing application
+
+After the initial inspection, do not stop at producing an audit report. Start implementing safe, necessary fixes directly in the current workspace.
+
+Work in this order:
+
+### Stage 1 — Restore the existing application
+
+- Resolve dependency installation and build errors.
+- Fix TypeScript errors, broken imports, incorrect routes, and frontend/backend integration issues.
+- Verify that the frontend and backend start correctly.
+- Preserve the current UI and existing working features.
+- Fix broken buttons and forms only after understanding their intended behavior.
+
+### Stage 2 — Restore configuration and authentication
+
+- Inspect the existing Supabase integration and required environment variables.
+- Identify missing secrets in the new Replit account.
+- Explain exactly which secrets I must configure and where to obtain them.
+- Never print secret values in logs or expose them in frontend code.
+- Fix email verification, expired verification links, callback URLs, login, signup, password recovery, and resend-verification functionality where needed.
+- Verify that Supabase Site URL and redirect URLs match the current deployment.
+- Do not weaken authentication, authorization, or Row Level Security.
+
+### Stage 3 — Restore database integrations
+
+- Inspect the existing schema, migrations, tables, functions, policies, and queries.
+- Identify missing database functions and broken API/database integrations.
+- Reuse the existing database and data whenever possible.
+- Prepare any required migration for review before applying it.
+- Do not reset the database, delete data, drop objects, or run destructive SQL without showing me the proposed changes and receiving my explicit approval.
+
+### Stage 4 — Finish incomplete FounderBrain features
+
+- Complete partially implemented features using the existing architecture.
+- Build missing features incrementally, based on the actual project state.
+- Connect forms, buttons, API endpoints, database operations, and frontend state correctly.
+- Use real authenticated database operations instead of mock records or hardcoded demo users.
+- Implement real AI functionality using the existing server-side Gemini integration and `GEMINI_API_KEY`, if supported by the codebase.
+- If a secret, service, or permission is unavailable, report the blocker instead of faking a successful result.
+
+### Stage 5 — Test the application
+
+Run all applicable checks:
+
+- Dependency installation
+- Frontend build
+- Backend build
+- TypeScript checks
+- Automated tests
+- API and database integration tests
+- Authentication and authorization checks
+- Browser tests for important user flows, if browser testing is available
+- Existing feature regression checks
+
+Report what passed, failed, was blocked, or was not tested. A successful build alone does not prove that the entire application works.
+
+## 5. Rules you must follow
+
+1. **Do not rebuild FounderBrain from scratch.**
+2. Do not replace my existing project with a starter template.
+3. Do not delete or overwrite existing work merely to simplify the implementation.
+4. Do not unnecessarily redesign the existing UI.
+5. Do not create fake users, fake startup records, mock investor data, fabricated AI responses, or false success messages.
+6. Do not hardcode secrets or expose server-side credentials.
+7. Do not bypass Supabase authentication or Row Level Security.
+8. Do not apply database migrations or destructive changes without my approval.
+9. Do not stop after the audit. Implement safe fixes and continue to the next incomplete stage.
+10. Work in small, reviewable stages and keep changes focused.
+11. Do not claim that a feature is complete until you have verified it.
+12. If a genuine blocker requires my action, give me the exact steps to resolve it.
+
+## 6. How to work with me
+
+I am a student developer, so explain technical issues in simple English.
+
+For each stage, tell me:
+- What you found.
+- What you changed.
+- Which files you modified.
+- Which commands and tests you ran.
+- What passed and what failed.
+- Whether you need my approval or a secret/configuration change.
+- What you will work on next.
+
+Do not repeatedly ask me to explain the project idea. Use the source code and this brief as your starting point.
+
+## 7. Start now
+
+Begin by confirming that you can access the actual FounderBrain source files in this new Replit workspace.
+
+Then inspect the project, establish the baseline, and identify the last completed stage.
+
+**Immediately continue from the existing codebase and implement the first safe fixes. Do not wait for access to my old Replit account, do not rebuild from scratch, and do not stop after producing the audit.**
+
+My goal is to turn this existing FounderBrain project into a stable, secure, fully functional SaaS application while preserving all the work I have already done.

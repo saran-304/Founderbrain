@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "FounderBrain"
+description = "Continue the supplied FounderBrain AI Startup OS: an authenticated workspace for founders to manage their work, teams, community, portfolios, fundraising, mentorship, and AI-assisted workflows."
+version = "1.0.0"
+id = "artifacts/founderbrain-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23608
+
+[services.development]
+run = "pnpm --filter @workspace/founderbrain-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/founderbrain-app", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/founderbrain-app/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23608"
+BASE_PATH = "/"
