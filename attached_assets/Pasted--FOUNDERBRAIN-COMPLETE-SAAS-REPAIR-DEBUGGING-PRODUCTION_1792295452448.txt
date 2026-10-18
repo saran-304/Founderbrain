@@ -1,0 +1,270 @@
+# FOUNDERBRAIN — COMPLETE SAAS REPAIR, DEBUGGING & PRODUCTION-READINESS PROMPT
+
+Act as a senior full-stack engineer, SaaS architect, debugging specialist, UI/UX designer, database engineer, and QA tester.
+
+My project is **FounderBrain — an AI Startup OS**, a SaaS platform that helps startup founders manage their work, projects, goals, teams, startup discovery, mentorship, and AI-powered workflows in one place.
+
+## CRITICAL RULE: REPAIR MY EXISTING PROJECT
+
+I already have an existing FounderBrain codebase in this Replit workspace.
+
+**DO NOT rebuild the project from scratch. DO NOT replace the starter template. DO NOT delete existing features, files, components, database tables, or working functionality.**
+
+First inspect the actual project and understand its existing architecture, design system, routes, authentication, API, database, environment variables, and installed dependencies.
+
+Preserve the existing FounderBrain branding, UI/UX, layouts, components, and working functionality. Make small, reviewable changes and reuse existing code wherever possible.
+
+## CURRENT CRITICAL BUG
+
+The main website/dashboard is displaying this error:
+
+"Something needs attention
+
+We couldn't load this view right now.
+
+Try again"
+
+My website is not loading the view correctly.
+
+Your first priority is to identify the actual root cause and fix it. Do not simply hide the error, remove the error component, or display fake content.
+
+Investigate all relevant possibilities:
+
+- Frontend JavaScript/runtime errors.
+- React component crashes and rendering errors.
+- Incorrect route configuration or broken navigation.
+- Failed API requests, incorrect endpoints, and HTTP 4xx/5xx responses.
+- Authentication/session restoration failures.
+- Supabase client configuration and environment variables.
+- Database schema mismatches, missing tables or columns, and migration issues.
+- Row Level Security (RLS) policies and authorization failures.
+- Incorrect loading states, unhandled promises, and null/undefined data.
+- CORS, server startup, build configuration, and dependency problems.
+- Incorrect API response formats or frontend/backend type mismatches.
+- Dashboard queries failing when a user has no projects, tasks, goals, or activity records.
+- Broken generated API hooks or stale client schemas, if present.
+
+Use the actual error logs, browser console where available, server logs, network/API responses, and code to establish the cause.
+
+Do not guess. Trace the failure from the affected page to its API, authentication, and database dependencies.
+
+## PHASE 1 — AUDIT AND PROTECT THE PROJECT
+
+Before changing code:
+
+1. Confirm the actual current working directory and project structure.
+2. Inspect the package manager, workspace configuration, installed dependencies, build scripts, frontend framework, backend framework, and routing.
+3. Inspect the current Git status and recent commits, if Git is available.
+4. Identify all existing routes, pages, components, API endpoints, Supabase clients, database migrations, and authentication flows.
+5. Identify which features already work and which are broken or incomplete.
+6. Inspect environment variable names without exposing secret values.
+7. Check for existing uncommitted work and preserve it.
+8. Create a safe backup or recovery checkpoint using the available project tools before risky changes.
+
+Do not reset Git, overwrite user changes, delete files, reinstall everything blindly, or run destructive commands.
+
+Provide a short audit report containing:
+- Confirmed root cause of the main-page error.
+- Files that need changing.
+- Existing features that must be preserved.
+- Tests and builds that currently pass or fail.
+
+If a destructive database change or migration is necessary, explain it and obtain my approval before executing it.
+
+## PHASE 2 — FIX THE MAIN WEBSITE ERROR FIRST
+
+Repair the actual underlying issue.
+
+Requirements:
+
+- The landing page must load correctly.
+- Login and registration must work.
+- Authenticated users must reach the correct dashboard.
+- Page refreshes must not break authentication or navigation.
+- Protected pages must enforce the existing authentication and authorization rules.
+- API calls must use the correct configured base URL and endpoints.
+- Loading, empty, success, and error states must be handled correctly.
+- Invalid or missing data must not crash the page.
+- Retry buttons must perform real retry operations.
+- Authentication failures must not create infinite loading loops.
+- The page must show meaningful errors in development logs without exposing secrets or internal stack traces to ordinary users.
+- Existing working pages and features must remain functional.
+
+Do not suppress exceptions or return hardcoded successful responses to make tests pass.
+
+## PHASE 3 — MAKE THE ENTIRE SAAS FUNCTIONAL
+
+After the main-page issue is fixed, audit and repair the existing modules.
+
+### A. Authentication and user profiles
+- Sign up, sign in, sign out, and session restoration.
+- Password reset if supported by the current authentication setup.
+- User profile viewing and editing.
+- Proper protected routes and authorization.
+- Correct handling of expired sessions.
+
+### B. Founder dashboard and My Work
+- Real dashboard metrics based on the authenticated user's authorized data.
+- Projects, tasks, goals, deadlines, and activity.
+- Create, view, edit, complete, and delete operations where appropriate.
+- Correct empty states for new users.
+- Dashboard numbers must come from actual database records.
+
+### C. Projects, tasks, and goals
+- Working CRUD operations.
+- Validations and useful error messages.
+- Correct ownership and workspace access.
+- Data must persist after refresh and login.
+- Related records must be handled safely.
+
+### D. Teams and collaboration
+- Create and manage teams or workspaces.
+- Invite or add members using the existing supported workflow.
+- Implement membership roles and permissions.
+- Handle join requests and invitations if those features already exist.
+- Prevent unauthorized access to another team's data.
+
+### E. Founder discovery and co-founder matching
+- Founder profiles and profile editing.
+- Search and filter real profiles.
+- Relevant founder/co-founder discovery.
+- Real database-backed results.
+- Proper privacy and access controls.
+
+### F. Community and portfolio
+- Startup updates, achievements, and community posts if included in the existing product.
+- Founder portfolio and startup information.
+- Create, edit, view, and delete operations according to permissions.
+- Search and filtering where applicable.
+
+### G. Investor discovery
+- Investor profiles and discovery only where supported by real data.
+- Search, filters, and profile details.
+- Do not invent investors, funding offers, contact details, or investment commitments.
+
+### H. Mentorship
+- Mentorship questions and answers.
+- Real saved content and proper ownership rules.
+- Clear unavailable or empty states when no mentor responses exist.
+
+### I. AI agents and Gemini
+- Use the existing server-side Gemini integration and the configured GEMINI_API_KEY secret.
+- Keep AI secrets on the server. Never expose them in frontend code or public responses.
+- AI features must require appropriate authentication and authorization.
+- Add input validation, error handling, and reasonable request limits.
+- Display a clear configuration message when the key or required service is unavailable.
+- Do not fabricate AI responses or pretend that a request succeeded.
+- Reuse existing AI routes and components instead of creating duplicate implementations.
+
+If a module is incomplete, implement it using the current architecture and design system. Do not break existing functionality to add a new feature.
+
+## PHASE 4 — DATABASE AND SECURITY
+
+Inspect the existing Supabase setup and preserve the current schema wherever possible.
+
+- Use the existing Supabase project and configured authentication.
+- Verify the actual tables, columns, relationships, and migration history before proposing schema changes.
+- Reuse existing tables and migrations.
+- Ensure Row Level Security is enabled and correctly configured for private user and workspace data.
+- Verify that users cannot access or modify unauthorized records.
+- Validate all inputs on the server.
+- Do not rely only on frontend checks for security.
+- Keep service-role credentials server-side only.
+- Avoid logging passwords, tokens, API keys, or private user information.
+- Handle missing environment variables clearly.
+- Never disable RLS to make a feature work.
+- Never reset, wipe, or replace the production database.
+- Do not run destructive migrations without my approval.
+
+Do not create a new database or authentication system unless the existing one is proven unusable and I approve the replacement.
+
+## PHASE 5 — UI/UX QUALITY
+
+Preserve the existing FounderBrain visual identity and improve it only where needed.
+
+- Professional, modern startup SaaS interface.
+- Consistent spacing, typography, colors, components, and responsive layouts.
+- Functional sidebar, header, menus, tabs, buttons, dialogs, forms, and navigation.
+- Responsive design for desktop, tablet, and mobile.
+- Accessible form labels and keyboard interactions.
+- Proper loading skeletons where appropriate.
+- Useful empty states for new accounts.
+- Clear success and error feedback based on actual operation results.
+
+Every visible button and form must have a meaningful, implemented action. Remove or disable misleading controls that have no implementation until they can be made functional.
+
+Never use fake dashboard metrics, fabricated users, mock investor records, hardcoded success messages, or temporary demo data as if they were real production data.
+
+## PHASE 6 — TEST THE WHOLE APPLICATION
+
+Run the checks supported by the existing project:
+
+1. TypeScript/type checks.
+2. Linting, if configured.
+3. Frontend production build.
+4. Backend/API production build.
+5. Existing unit and integration tests.
+6. Authentication and session restoration.
+7. Main-page and dashboard loading.
+8. API endpoint responses and error handling.
+9. Project/task/goal CRUD operations.
+10. Database persistence after refresh.
+11. RLS and cross-user/workspace authorization checks.
+12. Responsive layout and navigation.
+13. AI configuration and failure handling.
+14. All repaired routes and existing major features.
+
+Use the actual package manager and scripts discovered in the project. Do not invent commands without inspecting package.json and workspace configuration.
+
+If browser testing is available, launch the application and inspect the actual running website. If a test requires credentials, a connected service, or an unavailable environment, report the limitation rather than claiming the test passed.
+
+Fix regressions introduced by your changes and rerun the relevant tests.
+
+## PHASE 7 — DEPLOYMENT AND FINAL VERIFICATION
+
+Check that the application starts using the existing Replit configuration.
+
+Verify:
+- The required run command works.
+- The frontend loads.
+- The backend starts and responds.
+- Environment variables are correctly configured.
+- Routes work after refresh.
+- Authentication persists correctly.
+- Database operations succeed with real data.
+- No critical console errors or failed required API requests remain.
+
+Do not claim the application is production-ready merely because the build passes.
+
+## EXECUTION RULES
+
+Work in small, logical batches:
+
+Batch 1: Audit, reproduce, and fix the main-page error.
+Batch 2: Verify authentication, API connectivity, and dashboard loading.
+Batch 3: Repair existing CRUD features and database integration.
+Batch 4: Audit and repair remaining existing modules.
+Batch 5: Run full verification and fix regressions.
+
+Start with Batch 1 immediately. Continue to the next batch only after the previous batch has been tested and its results reported.
+
+You may make safe, reversible code fixes without asking me about every file. Ask for approval before destructive operations, production database changes, or actions that could lose user data.
+
+If blocked by missing credentials, unavailable external services, or platform limitations, explain exactly what is blocked and what action is required.
+
+## FINAL REPORT
+
+At the end, provide:
+
+1. The confirmed cause of the original error.
+2. The files changed and why.
+3. The fixes implemented.
+4. The features now verified as working.
+5. The exact build and test results.
+6. Any remaining broken or unverified features.
+7. Any environment variables or manual steps I must complete.
+8. Any database migrations that require my approval.
+
+**Success means the existing FounderBrain website actually runs, its main page loads, its working features are preserved, its data is real and persistent, and the repaired functionality has been tested. It does not mean merely removing the error message or creating a visually impressive but nonfunctional mockup.**
+
+Begin by inspecting the current workspace and diagnosing the exact main-page error. Do not rebuild from scratch.
