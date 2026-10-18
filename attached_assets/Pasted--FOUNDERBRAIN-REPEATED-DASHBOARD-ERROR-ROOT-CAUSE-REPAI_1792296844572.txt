@@ -1,0 +1,63 @@
+# FOUNDERBRAIN — REPEATED DASHBOARD ERROR: ROOT-CAUSE REPAIR
+
+My existing FounderBrain SaaS website repeatedly displays:
+
+"Something needs attention. We couldn't load this view right now. Try again."
+
+Clicking Try again produces the same error. Multiple pages are affected, and the expected features are not visible.
+
+A previous investigation reported:
+- `GET /api/workspaces` returns HTTP 500.
+- Supabase/PostgREST error `PGRST205`.
+- The workspace API queries `workspace_members` and its relationship to `workspaces`.
+- `get_public_founder_portfolio` previously returned `PGRST202`.
+- `/api/healthz` returns HTTP 200, but the dashboard remains broken.
+
+## YOUR FIRST TASK: FIX THE ACTUAL ROOT CAUSE
+
+Do not rebuild, replace, or redesign the existing project.
+
+1. Inspect the current code and reproduce the workspace API failure using the available preview and logs.
+2. Inspect the workspace API handler and the exact failing Supabase query.
+3. Check whether the configured Supabase project is the intended project.
+4. Verify the existence of `public.workspace_members` and `public.workspaces`, their columns, foreign keys, and the relationship used by the query.
+5. Verify migration history for:
+   - `20261016000000_founderbrain_core.sql`
+   - `20261016001000_founderbrain_growth.sql`
+   - `20261017000000_founderbrain_member_update_privileges.sql`
+   - `20261017000100_founderbrain_public_portfolios.sql`
+6. Determine whether the core migration is missing, the schema cache is stale, or the code references the wrong schema, table, or relationship.
+7. Do not claim migration status unless you can verify it through authorized database access.
+8. Do not reset the database, disable RLS, create duplicate tables, expose service-role keys, or run unapproved migrations.
+
+If you only have the Supabase anon key and cannot inspect the migration ledger, stop and tell me exactly what the project owner needs to check. Do not invent a successful result.
+
+## FIX AND VERIFY
+
+After the root cause is confirmed and any required database changes have been authorized:
+
+- Repair the smallest necessary part of the existing implementation.
+- Verify the workspace API using an authenticated session.
+- Confirm that the API returns the expected workspace data, including the valid empty state where appropriate.
+- Verify that the dashboard loads its actual data.
+- Investigate the portfolio function separately.
+- Check whether the other pages fail because they depend on the same broken workspace request.
+- Test project, task, and goal CRUD operations.
+- Run the existing build and tests.
+- Inspect the actual preview after the repair.
+
+Preserve all existing branding, authentication, database records, routes, and working functionality.
+
+Do not hide the error, hardcode successful responses, use mock data, or claim the website works just because the build succeeds.
+
+## REPORT BACK
+
+Tell me:
+1. The exact root cause.
+2. Whether the database owner must take action.
+3. The files changed.
+4. The API response before and after the repair.
+5. Whether the dashboard actually loaded in the preview.
+6. Which features remain unverified.
+
+Start with the workspace API and Supabase schema problem. Do not add new features until the existing application works.
