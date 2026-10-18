@@ -8,7 +8,7 @@ import {
 } from '../lib/supabase-api';
 
 const router: IRouter = Router();
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3.8-flash';
 const ASSISTANT_GUIDANCE = [
   'You are a startup planning assistant. Use only facts the founder provides in their prompt.',
   'Do not claim to have performed market research, contacted anyone, verified competitors, or confirmed demand.',

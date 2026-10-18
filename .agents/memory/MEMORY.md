@@ -1,0 +1,1 @@
+- [Gemini model lifecycle](gemini-model-lifecycle.md) — separate API-key validity from model retirement and temporary provider capacity errors.
