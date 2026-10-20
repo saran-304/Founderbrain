@@ -538,6 +538,16 @@ export interface FounderConnection {
   updatedAt: string;
 }
 
+export interface FounderMatch {
+  founder: FounderProfile;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  compatibilityScore: number;
+  explanation: string[];
+}
+
 export interface FounderConnectionInput {
   recipientId: string;
 }
@@ -1165,6 +1175,14 @@ export const SearchFoundersStage = {
   series_b_plus: 'series_b_plus',
   other: 'other',
 } as const;
+
+export type GetFounderMatchesParams = {
+/**
+ * @minimum 1
+ * @maximum 20
+ */
+limit?: number;
+};
 
 export type ListCommunityPostsParams = {
 /**

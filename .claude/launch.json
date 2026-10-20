@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api-server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 23608,
+      "cwd": "artifacts/api-server"
+    },
+    {
+      "name": "founderbrain-app",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "cwd": "artifacts/founderbrain-app"
+    }
+  ]
+}

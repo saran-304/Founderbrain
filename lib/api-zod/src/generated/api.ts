@@ -694,6 +694,49 @@ export const SearchFoundersResponse = zod.array(SearchFoundersResponseItem)
 
 
 /**
+ * @summary Get co-founder compatibility matches based on profile
+ */
+export const getFounderMatchesQueryLimitDefault = 10;
+export const getFounderMatchesQueryLimitMax = 20;
+
+
+
+export const GetFounderMatchesQueryParams = zod.object({
+  "limit": zod.coerce.number().int().min(1).max(getFounderMatchesQueryLimitMax).default(getFounderMatchesQueryLimitDefault)
+})
+
+export const getFounderMatchesResponseCompatibilityScoreMin = 0;
+export const getFounderMatchesResponseCompatibilityScoreMax = 100;
+
+
+
+export const GetFounderMatchesResponseItem = zod.object({
+  "founder": zod.object({
+  "id": zod.string().uuid(),
+  "displayName": zod.string(),
+  "headline": zod.string().nullable(),
+  "bio": zod.string().nullable(),
+  "skills": zod.array(zod.string()),
+  "location": zod.string().nullable(),
+  "company": zod.string().nullable(),
+  "stage": zod.string().nullable(),
+  "websiteUrl": zod.string().url().nullable(),
+  "isDiscoverable": zod.boolean(),
+  "portfolioIsPublic": zod.boolean(),
+  "lookingForCoFounder": zod.boolean().nullish(),
+  "professionalInterests": zod.array(zod.string()).optional(),
+  "collaborationPreferences": zod.string().nullish(),
+  "preferredCollaborationSkills": zod.array(zod.string()).optional(),
+  "startupIdea": zod.string().nullish(),
+  "updatedAt": zod.coerce.date()
+}),
+  "compatibilityScore": zod.number().min(getFounderMatchesResponseCompatibilityScoreMin).max(getFounderMatchesResponseCompatibilityScoreMax),
+  "explanation": zod.array(zod.string())
+})
+export const GetFounderMatchesResponse = zod.array(GetFounderMatchesResponseItem)
+
+
+/**
  * @summary Get the authenticated founder's profile
  */
 export const GetFounderProfileResponse = zod.object({

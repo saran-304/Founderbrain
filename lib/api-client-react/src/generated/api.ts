@@ -41,12 +41,14 @@ import type {
   FounderConnection,
   FounderConnectionInput,
   FounderConnectionUpdate,
+  FounderMatch,
   FounderPortfolio,
   FounderProfile,
   FounderProfileUpdate,
   FundraisingStage,
   FundraisingStageInput,
   GetDashboardSummaryParams,
+  GetFounderMatchesParams,
   Goal,
   GoalInput,
   GoalUpdate,
@@ -2741,6 +2743,90 @@ export function useSearchFounders<TData = Awaited<ReturnType<typeof searchFounde
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getSearchFoundersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetFounderMatchesUrl = (params?: GetFounderMatchesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/founders/matches?${stringifiedParams}` : `/api/founders/matches`
+}
+
+/**
+ * @summary Get co-founder compatibility matches based on profile
+ */
+export const getFounderMatches = async (params?: GetFounderMatchesParams, options?: Parameters<typeof customFetch>[1]): Promise<FounderMatch[]> => {
+
+  return customFetch<FounderMatch[]>(getGetFounderMatchesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFounderMatchesQueryKey = (params?: GetFounderMatchesParams,) => {
+    return [
+    `/api/founders/matches`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetFounderMatchesQueryOptions = <TData = Awaited<ReturnType<typeof getFounderMatches>>, TError = ErrorType<unknown>>(params?: GetFounderMatchesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFounderMatches>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFounderMatchesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFounderMatches>>> = ({ signal }) => getFounderMatches(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFounderMatches>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetFounderMatchesQueryResult = NonNullable<Awaited<ReturnType<typeof getFounderMatches>>>
+export type GetFounderMatchesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get co-founder compatibility matches based on profile
+ */
+
+export function useGetFounderMatches<TData = Awaited<ReturnType<typeof getFounderMatches>>, TError = ErrorType<unknown>>(
+ params?: GetFounderMatchesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFounderMatches>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetFounderMatchesQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

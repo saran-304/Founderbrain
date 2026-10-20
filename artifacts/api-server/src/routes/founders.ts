@@ -317,4 +317,120 @@ router.delete('/connections/:connectionId', async (req, res): Promise<void> => {
   res.status(204).end();
 });
 
+function calculateCompatibility(myProfile: any, otherProfile: any): { score: number; explanation: string[] } {
+  const explanation: string[] = [];
+  let score = 0;
+
+  // Check if both are looking for co-founders (30 points)
+  if (myProfile.looking_for_co_founder && otherProfile.looking_for_co_founder) {
+    score += 30;
+    explanation.push('Both actively seeking co-founders');
+  } else if (otherProfile.looking_for_co_founder) {
+    score += 15;
+    explanation.push('They are looking for a co-founder');
+  }
+
+  // Complementary skills (up to 25 points)
+  const mySkills = new Set(myProfile.skills || []);
+  const otherSkills = new Set(otherProfile.skills || []);
+  const complementarySkills = [...otherSkills].filter((s: string) => !mySkills.has(s));
+  if (complementarySkills.length > 0) {
+    const skillScore = Math.min(25, complementarySkills.length * 5);
+    score += skillScore;
+    explanation.push(`Complementary skills: ${complementarySkills.slice(0, 3).join(', ')}`);
+  }
+
+  // Shared professional interests (up to 20 points)
+  const myInterests = new Set(myProfile.professional_interests || []);
+  const otherInterests = new Set(otherProfile.professional_interests || []);
+  const sharedInterests = [...myInterests].filter((i: string) => otherInterests.has(i));
+  if (sharedInterests.length > 0) {
+    const interestScore = Math.min(20, sharedInterests.length * 7);
+    score += interestScore;
+    explanation.push(`Shared interests: ${sharedInterests.slice(0, 2).join(', ')}`);
+  }
+
+  // Startup stage compatibility (up to 15 points)
+  const stageOrder = ['idea', 'bootstrapped', 'pre_seed', 'seed', 'series_a', 'series_b_plus', 'other'];
+  const myStageIndex = stageOrder.indexOf(myProfile.stage || 'idea');
+  const otherStageIndex = stageOrder.indexOf(otherProfile.stage || 'idea');
+  const stageDiff = Math.abs(myStageIndex - otherStageIndex);
+  if (stageDiff <= 1) {
+    score += 15;
+    explanation.push('Similar startup stage');
+  } else if (stageDiff <= 2) {
+    score += 8;
+    explanation.push('Compatible startup stage');
+  }
+
+  // Collaboration preferences match (up to 10 points)
+  if (myProfile.collaboration_preferences && otherProfile.collaboration_preferences) {
+    const myPrefs = myProfile.collaboration_preferences.toLowerCase();
+    const otherPrefs = otherProfile.collaboration_preferences.toLowerCase();
+    if (myPrefs.includes(otherPrefs) || otherPrefs.includes(myPrefs)) {
+      score += 10;
+      explanation.push('Aligned collaboration preferences');
+    }
+  }
+
+  return { score: Math.min(100, score), explanation };
+}
+
+router.get('/founders/matches', async (req, res): Promise<void> => {
+  const parsed = api.GetFounderMatchesQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid match parameters.' });
+    return;
+  }
+
+  const userId = getRequestUser(req).id;
+  const limit = parsed.data.limit ?? 10;
+
+  // Get current user's profile
+  const { data: myProfile, error: profileError } = await getRequestSupabase(req)
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (profileError) {
+    sendSupabaseError(req, res, profileError, 'load your profile');
+    return;
+  }
+  if (!myProfile) {
+    res.status(404).json({ error: 'Your profile not found. Please complete your profile first.' });
+    return;
+  }
+
+  // Get discoverable profiles excluding self
+  const { data, error } = await getRequestSupabase(req)
+    .from('profiles')
+    .select('*')
+    .eq('is_discoverable', true)
+    .neq('id', userId)
+    .order('updated_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    sendSupabaseError(req, res, error, 'load founder profiles for matching');
+    return;
+  }
+
+  // Calculate compatibility for each profile
+  const matches = (data ?? [])
+    .map((profile) => {
+      const { score, explanation } = calculateCompatibility(myProfile, profile);
+      return {
+        founder: toProfile(profile),
+        compatibilityScore: score,
+        explanation,
+      };
+    })
+    .filter((match) => match.compatibilityScore > 20) // Only show meaningful matches
+    .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+    .slice(0, limit);
+
+  res.json(api.GetFounderMatchesResponse.parse(matches));
+});
+
 export default router;
