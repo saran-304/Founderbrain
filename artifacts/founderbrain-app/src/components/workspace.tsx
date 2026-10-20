@@ -130,6 +130,7 @@ const navItems = [
   { href: '/mentorship', label: 'Mentorship', icon: CircleHelp },
   { href: '/assistants', label: 'Assistants', icon: Sparkles },
   { href: '/fundraising', label: 'Fundraising', icon: TrendingUp },
+  { href: '/about', label: 'About Founderbrain', icon: CircleHelp },
 ] as const;
 
 export function WorkspaceShell({ children }: { children: ReactNode }) {
@@ -138,7 +139,10 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
   const workspaceQuery = useListWorkspaces();
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
-  const workspaceIds = useMemo(() => (workspaceQuery.data ?? []).map((workspace) => workspace.id), [workspaceQuery.data]);
+  const workspaceIds = useMemo(() => {
+    const data = workspaceQuery.data;
+    return Array.isArray(data) ? data.map((workspace) => workspace.id) : [];
+  }, [workspaceQuery.data]);
   useEffect(() => {
     if (!workspaceIds.includes(selectedWorkspaceId)) {
       setSelectedWorkspaceId(workspaceIds[0] ?? '');
@@ -154,7 +158,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
       <div className="grid h-9 w-9 place-items-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground"><Command className="h-5 w-5" /></div>
       <div><div className="text-base font-semibold tracking-tight">Founderbrain</div><div className="text-[11px] text-sidebar-foreground/60">FOUNDER WORKSPACE</div></div>
     </Link>
-    <WorkspacePicker workspaces={workspaceQuery.data ?? []} isLoading={workspaceQuery.isLoading} isError={workspaceQuery.isError} refetch={() => { void workspaceQuery.refetch(); }} current={selectedWorkspaceId} onChange={setSelectedWorkspaceId} />
+    <WorkspacePicker workspaces={Array.isArray(workspaceQuery.data) ? workspaceQuery.data : []} isLoading={workspaceQuery.isLoading} isError={workspaceQuery.isError} refetch={() => { void workspaceQuery.refetch(); }} current={selectedWorkspaceId} onChange={setSelectedWorkspaceId} />
     <div className="mt-8 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/50">Workspace</div>
     <nav className="mt-2 space-y-1" aria-label="Workspace navigation">
       {navItems.map(({ href, label, icon: Icon }) => {

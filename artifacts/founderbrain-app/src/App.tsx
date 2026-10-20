@@ -9,6 +9,8 @@ import AuthPage from '@/pages/auth';
 import { EmailVerificationCallbackPage, PasswordUpdatePage } from '@/pages/auth-return';
 import DashboardPage from '@/pages/dashboard';
 import SettingsPage from '@/pages/settings';
+import AboutPage from '@/pages/about';
+import { MessagesPage } from '@/pages/messages';
 import {
   TeamsPage, FoundersPage, CommunityPage, PortfolioPage, PublicPortfolioPage, MentorshipPage, NotificationsPage,
 } from '@/pages/network';
@@ -91,6 +93,7 @@ function Router() {
         <Route path="/fundraising"><Protected><FundraisingPage /></Protected></Route>
         <Route path="/notifications"><Protected><NotificationsPage /></Protected></Route>
         <Route path="/settings"><Protected><SettingsPage /></Protected></Route>
+        <Route path="/about" component={AboutPage} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

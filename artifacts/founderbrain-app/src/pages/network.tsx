@@ -216,14 +216,62 @@ export function PortfolioPage() {
   const create = useCreateAchievement();
   const update = useUpdateAchievement();
   const remove = useDeleteAchievement();
-  const [form, setForm] = useState({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' });
-  const [editing, setEditing] = useState<Achievement | null>(null);
-  const refresh = () => { invalidate(client, getListMyAchievementsQueryKey()); invalidate(client, getGetFounderProfileQueryKey()); };
+  const [form, setForm] = useState({
+    displayName: '',
+    headline: '',
+    bio: '',
+    skills: '',
+    location: '',
+    company: '',
+    stage: '',
+    websiteUrl: '',
+    isDiscoverable: false
+  });
+  const [editing, setEditing] = useState(false);
+
+  // Initialize form with current profile data
+  useEffect(() => {
+    if (profile.data) {
+      setForm({
+        displayName: profile.data.displayName || '',
+        headline: profile.data.headline || '',
+        bio: profile.data.bio || '',
+        skills: profile.data.skills.join(', ') || '',
+        location: profile.data.location || '',
+        company: profile.data.company || '',
+        stage: profile.data.stage || '',
+        websiteUrl: profile.data.websiteUrl || '',
+        isDiscoverable: profile.data.isDiscoverable || false,
+      });
+    }
+  }, [profile.data]);
+
+  const saveProfile = (event: FormEvent) => {
+    event.preventDefault();
+    updateProfile.mutate({
+      founderId: user!.id,
+      data: {
+        ...form,
+        skills: form.skills.split(',').map(s => s.trim()).filter(Boolean),
+      }
+    }, {
+      onSuccess: () => {
+        setEditing(false);
+        refresh();
+        toast({ title: 'Profile updated' });
+      },
+      onError: () => toast({ title: 'Could not update profile', variant: 'destructive' })
+    });
+  };
+
+  const [achievementForm, setAchievementForm] = useState({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' });
+  const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
+
   const saveAchievement = (event: FormEvent) => {
     event.preventDefault();
-    const data = { title: form.title.trim(), description: form.description || null, category: form.category || null, externalUrl: form.externalUrl || null, issuedOn: form.issuedOn || null };
-    if (editing) update.mutate({ achievementId: editing.id, data }, { onSuccess: () => { setEditing(null); setForm({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' }); refresh(); }, onError: () => toast({ title: 'Could not update achievement', variant: 'destructive' }) });
-    else create.mutate({ data }, { onSuccess: () => { setForm({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' }); refresh(); }, onError: () => toast({ title: 'Could not add achievement', variant: 'destructive' }) });
+    const data = { title: achievementForm.title.trim(), description: achievementForm.description || null, category: achievementForm.category || null, externalUrl: achievementForm.externalUrl || null, issuedOn: achievementForm.issuedOn || null };
+    if (editingAchievement) update.mutate({ achievementId: editingAchievement.id, data }, { onSuccess: () => { setEditingAchievement(null); setAchievementForm({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' }); refresh(); }, onError: () => toast({ title: 'Could not update achievement', variant: 'destructive' }) });
+    else create.mutate({ data }, { onSuccess: () => { setAchievementForm({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' }); refresh(); }, onError: () => toast({ title: 'Could not add achievement', variant: 'destructive' }) });
   };
   if (profile.isLoading || achievements.isLoading) return <LoadingBlock title="Loading your portfolio" />;
   if (profile.isError || achievements.isError) return <QueryError onRetry={() => { void profile.refetch(); void achievements.refetch(); }} />;
@@ -233,17 +281,32 @@ export function PortfolioPage() {
   };
   return <div className="max-w-5xl">
     <PageHeading eyebrow="Proof of progress" title="Your founder portfolio" description="Bring meaningful milestones together in one place. You decide whether it can be seen publicly." />
+    <Card className="mb-5"><CardContent>
+        <form onSubmit={saveProfile} className="space-y-4">
+            <h2 className="font-semibold">Edit Profile</h2>
+            <div className="grid grid-cols-2 gap-4">
+                <label className="block space-y-2 text-sm font-medium">Display Name<Input required value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} /></label>
+                <label className="block space-y-2 text-sm font-medium">Headline<Input value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} /></label>
+                <label className="block space-y-2 text-sm font-medium sm:col-span-2">Bio<Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} /></label>
+                <label className="block space-y-2 text-sm font-medium">Skills (comma-separated)<Input value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} /></label>
+                <label className="block space-y-2 text-sm font-medium">Company<Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} /></label>
+                <label className="block space-y-2 text-sm font-medium">Location<Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></label>
+                <label className="block space-y-2 text-sm font-medium">Website<Input value={form.websiteUrl} onChange={(e) => setForm({ ...form, websiteUrl: e.target.value })} /></label>
+            </div>
+            <Button type="submit" disabled={updateProfile.isPending}>Save Profile</Button>
+        </form>
+    </CardContent></Card>
     <Card className="mb-5"><CardContent className="flex flex-wrap items-center justify-between gap-4 p-5"><div><h2 className="font-semibold">{profile.data?.displayName || 'Your portfolio'}</h2><p className="mt-1 text-sm text-muted-foreground">Visibility is off by default. Your profile discovery preference is managed separately.</p></div><div className="flex items-center gap-3"><span className="text-sm font-medium">{profile.data?.portfolioIsPublic ? 'Public portfolio' : 'Private portfolio'}</span><Switch checked={profile.data?.portfolioIsPublic ?? false} onCheckedChange={visibility} aria-label="Make portfolio public" /></div></CardContent></Card>
     <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-      <Card><CardHeader><CardTitle className="text-base">{editing ? 'Edit achievement' : 'Add an achievement'}</CardTitle><CardDescription>Capture a launch, award, milestone, or piece of work worth remembering.</CardDescription></CardHeader><CardContent><form onSubmit={saveAchievement} className="space-y-3">
-        <label className="block space-y-2 text-sm font-medium">Title<Input required maxLength={160} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label>
-        <label className="block space-y-2 text-sm font-medium">Description<Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
-        <label className="block space-y-2 text-sm font-medium">Category<Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Launch, funding, award…" /></label>
-        <label className="block space-y-2 text-sm font-medium">Link (optional)<Input type="url" value={form.externalUrl} onChange={(e) => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://" /></label>
-        <label className="block space-y-2 text-sm font-medium">Date<Input type="date" value={form.issuedOn} onChange={(e) => setForm({ ...form, issuedOn: e.target.value })} /></label>
-        <div className="flex gap-2"><Button type="submit" disabled={create.isPending || update.isPending}>{editing ? 'Save achievement' : 'Add achievement'}</Button>{editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' }); }}>Cancel</Button>}</div>
+      <Card><CardHeader><CardTitle className="text-base">{editingAchievement ? 'Edit achievement' : 'Add an achievement'}</CardTitle><CardDescription>Capture a launch, award, milestone, or piece of work worth remembering.</CardDescription></CardHeader><CardContent><form onSubmit={saveAchievement} className="space-y-3">
+        <label className="block space-y-2 text-sm font-medium">Title<Input required maxLength={160} value={achievementForm.title} onChange={(e) => setAchievementForm({ ...achievementForm, title: e.target.value })} /></label>
+        <label className="block space-y-2 text-sm font-medium">Description<Textarea rows={3} value={achievementForm.description} onChange={(e) => setAchievementForm({ ...achievementForm, description: e.target.value })} /></label>
+        <label className="block space-y-2 text-sm font-medium">Category<Input value={achievementForm.category} onChange={(e) => setAchievementForm({ ...achievementForm, category: e.target.value })} placeholder="Launch, funding, award…" /></label>
+        <label className="block space-y-2 text-sm font-medium">Link (optional)<Input type="url" value={achievementForm.externalUrl} onChange={(e) => setAchievementForm({ ...achievementForm, externalUrl: e.target.value })} placeholder="https://" /></label>
+        <label className="block space-y-2 text-sm font-medium">Date<Input type="date" value={achievementForm.issuedOn} onChange={(e) => setAchievementForm({ ...achievementForm, issuedOn: e.target.value })} /></label>
+        <div className="flex gap-2"><Button type="submit" disabled={create.isPending || update.isPending}>{editingAchievement ? 'Save achievement' : 'Add achievement'}</Button>{editingAchievement && <Button type="button" variant="outline" onClick={() => { setEditingAchievement(null); setAchievementForm({ title: '', description: '', category: '', externalUrl: '', issuedOn: '' }); }}>Cancel</Button>}</div>
       </form></CardContent></Card>
-      <section className="space-y-3">{achievements.data?.length ? achievements.data.map((achievement) => <Card key={achievement.id}><CardContent className="flex gap-4 p-5"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-secondary text-primary"><Award className="h-5 w-5" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold">{achievement.title}</h3>{achievement.category && <Badge variant="outline">{achievement.category}</Badge>}</div><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{achievement.description || 'A milestone added to your portfolio.'}</p><div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">{achievement.issuedOn && <span>{dateLabel(achievement.issuedOn)}</span>}{achievement.externalUrl && <a className="inline-flex items-center gap-1 text-primary underline" href={achievement.externalUrl} target="_blank" rel="noreferrer">Open link<ArrowUpRight className="h-3 w-3" /></a>}</div><div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEditing(achievement); setForm({ title: achievement.title, description: achievement.description ?? '', category: achievement.category ?? '', externalUrl: achievement.externalUrl ?? '', issuedOn: achievement.issuedOn ?? '' }); }}>Edit</Button><Button size="sm" variant="ghost" onClick={() => { if (window.confirm(`Delete “${achievement.title}”?`)) remove.mutate({ achievementId: achievement.id }, { onSuccess: refresh, onError: () => toast({ title: 'Could not delete achievement', variant: 'destructive' }) }); }}>Delete</Button></div></div></CardContent></Card>) : <EmptyState title="A portfolio of the work that matters" description="Add your first achievement. You can edit or remove it any time." />}</section>
+      <section className="space-y-3">{achievements.data?.length ? achievements.data.map((achievement) => <Card key={achievement.id}><CardContent className="flex gap-4 p-5"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-secondary text-primary"><Award className="h-5 w-5" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold">{achievement.title}</h3>{achievement.category && <Badge variant="outline">{achievement.category}</Badge>}</div><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{achievement.description || 'A milestone added to your portfolio.'}</p><div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">{achievement.issuedOn && <span>{dateLabel(achievement.issuedOn)}</span>}{achievement.externalUrl && <a className="inline-flex items-center gap-1 text-primary underline" href={achievement.externalUrl} target="_blank" rel="noreferrer">Open link<ArrowUpRight className="h-3 w-3" /></a>}</div><div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEditingAchievement(achievement); setAchievementForm({ title: achievement.title, description: achievement.description ?? '', category: achievement.category ?? '', externalUrl: achievement.externalUrl ?? '', issuedOn: achievement.issuedOn ?? '' }); }}>Edit</Button><Button size="sm" variant="ghost" onClick={() => { if (window.confirm(`Delete “${achievement.title}”?`)) remove.mutate({ achievementId: achievement.id }, { onSuccess: refresh, onError: () => toast({ title: 'Could not delete achievement', variant: 'destructive' }) }); }}>Delete</Button></div></div></CardContent></Card>) : <EmptyState title="A portfolio of the work that matters" description="Add your first achievement. You can edit or remove it any time." />}</section>
     </div>
   </div>;
 }

@@ -46,53 +46,46 @@ function toFollowUp(row: any) {
   };
 }
 
+
 router.get('/workspaces/:workspaceId/fundraising-stage', async (req, res): Promise<void> => {
   const params = api.GetFundraisingStageParams.safeParse(req.params);
+
   if (!params.success) {
     res.status(400).json({ error: 'A valid workspaceId is required.' });
     return;
   }
+
   if (!(await requireWorkspaceAccess(req, res, params.data.workspaceId))) return;
+
   const { data, error } = await getRequestSupabase(req)
     .from('workspaces')
-    .select('id,fundraising_stage,updated_at')
+    .select('id,fundraising_stage,created_at')
     .eq('id', params.data.workspaceId)
     .single();
+
   if (error) {
+    req.log.error(
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      },
+      'Fundraising stage Supabase query failed',
+    );
     sendSupabaseError(req, res, error, 'load fundraising stage');
     return;
   }
-  res.json(api.GetFundraisingStageResponse.parse({
-    workspaceId: data.id,
-    stage: data.fundraising_stage,
-    updatedAt: data.updated_at,
-  }));
+
+  res.json(
+    api.GetFundraisingStageResponse.parse({
+      workspaceId: data.id,
+      stage: data.fundraising_stage,
+      updatedAt: data.created_at,
+    }),
+  );
 });
 
-router.put('/workspaces/:workspaceId/fundraising-stage', async (req, res): Promise<void> => {
-  const params = api.UpdateFundraisingStageParams.safeParse(req.params);
-  const body = api.UpdateFundraisingStageBody.safeParse(req.body);
-  if (!params.success || !body.success) {
-    res.status(400).json({ error: 'Choose a valid fundraising stage.' });
-    return;
-  }
-  if (!(await requireWorkspaceAdmin(req, res, params.data.workspaceId))) return;
-  const { data, error } = await getRequestSupabase(req)
-    .from('workspaces')
-    .update({ fundraising_stage: body.data.stage })
-    .eq('id', params.data.workspaceId)
-    .select('id,fundraising_stage,updated_at')
-    .single();
-  if (error) {
-    sendSupabaseError(req, res, error, 'update fundraising stage');
-    return;
-  }
-  res.json(api.UpdateFundraisingStageResponse.parse({
-    workspaceId: data.id,
-    stage: data.fundraising_stage,
-    updatedAt: data.updated_at,
-  }));
-});
 
 router.get('/workspaces/:workspaceId/investors', async (req, res): Promise<void> => {
   const params = api.ListInvestorsParams.safeParse(req.params);
