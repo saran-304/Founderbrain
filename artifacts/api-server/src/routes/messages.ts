@@ -1,10 +1,5 @@
 import { Router, type IRouter } from 'express';
-import {
-  CreateMessageBody,
-  CreateMessageResponse,
-  ListConversationsResponse,
-  ListMessagesResponse,
-} from '@workspace/api-zod';
+import * as api from '@workspace/api-zod';
 import {
   getRequestSupabase,
   getRequestUser,
@@ -48,7 +43,7 @@ router.get('/messages', async (req, res): Promise<void> => {
     }
   });
 
-  res.json(ListConversationsResponse.parse(Array.from(conversationsMap.values())));
+  res.json(api.ListConversationsResponse.parse(Array.from(conversationsMap.values())));
 });
 
 // Fetch conversation history
@@ -82,12 +77,12 @@ router.get('/messages/:recipientId', async (req, res): Promise<void> => {
     return;
   }
 
-  res.json(ListMessagesResponse.parse(data ?? []));
+  res.json(api.ListMessagesResponse.parse(data ?? []));
 });
 
 // Send message
 router.post('/messages', async (req, res): Promise<void> => {
-  const parsed = CreateMessageBody.safeParse(req.body);
+  const parsed = api.CreateMessageBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: 'Invalid message content.' });
     return;
@@ -125,7 +120,7 @@ router.post('/messages', async (req, res): Promise<void> => {
     return;
   }
 
-  res.status(201).json(CreateMessageResponse.parse(data));
+  res.status(201).json(api.CreateMessageResponse.parse(data));
 });
 
 // Mark as read

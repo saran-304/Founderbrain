@@ -164,9 +164,16 @@ export function FoundersPage() {
   const client = useQueryClient();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
+  const [stage, setStage] = useState<string>('');
+  const [lookingForCoFounder, setLookingForCoFounder] = useState<boolean | undefined>(undefined);
   const [mentorshipProfile, setMentorshipProfile] = useState<{ id: string; name: string } | null>(null);
   const [mentorshipMessage, setMentorshipMessage] = useState('');
-  const params = useMemo(() => ({ q: search.trim() || undefined, limit: 24 }), [search]);
+  const params = useMemo(() => ({
+    q: search.trim() || undefined,
+    stage: (stage || undefined) as any,
+    lookingForCoFounder,
+    limit: 24
+  }), [search, stage, lookingForCoFounder]);
   const profiles = useSearchFounders(params, { query: { queryKey: getSearchFoundersQueryKey(params) } });
   const connections = useListFounderConnections();
   const mentorshipRequests = useListMentorshipRequests();
@@ -179,15 +186,41 @@ export function FoundersPage() {
   if (profiles.isError || connections.isError || mentorshipRequests.isError) return <QueryError onRetry={() => { void profiles.refetch(); void connections.refetch(); void mentorshipRequests.refetch(); }} />;
   const requests = connections.data ?? [];
   const mentorRequests = mentorshipRequests.data ?? [];
+  const hasFilters = search || stage || lookingForCoFounder !== undefined;
+  const clearFilters = () => { setSearch(''); setStage(''); setLookingForCoFounder(undefined); };
   return <div>
     <PageHeading eyebrow="Founder network" title="Meet people building in your orbit" description="Find founders who opted into discovery. A connection or mentorship request is always sent only when you ask for it." />
     <div className="mb-5 relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input className="pl-9" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by name, company, or skill" aria-label="Search founder profiles" /></div>
+    <div className="mb-5 flex flex-wrap gap-3">
+      <Select value={stage} onValueChange={setStage}>
+        <SelectTrigger className="w-[180px]" aria-label="Filter by stage"><SelectValue placeholder="Startup stage" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">All stages</SelectItem>
+          <SelectItem value="idea">Idea</SelectItem>
+          <SelectItem value="bootstrapped">Bootstrapped</SelectItem>
+          <SelectItem value="pre_seed">Pre-Seed</SelectItem>
+          <SelectItem value="seed">Seed</SelectItem>
+          <SelectItem value="series_a">Series A</SelectItem>
+          <SelectItem value="series_b_plus">Series B+</SelectItem>
+          <SelectItem value="other">Other</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={lookingForCoFounder === undefined ? '' : lookingForCoFounder.toString()} onValueChange={(v) => setLookingForCoFounder(v === '' ? undefined : v === 'true')}>
+        <SelectTrigger className="w-[200px]" aria-label="Filter by co-founder status"><SelectValue placeholder="Co-founder status" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">All founders</SelectItem>
+          <SelectItem value="true">Looking for co-founder</SelectItem>
+          <SelectItem value="false">Not looking</SelectItem>
+        </SelectContent>
+      </Select>
+      {hasFilters && <Button variant="outline" size="sm" onClick={clearFilters}>Clear filters</Button>}
+    </div>
     {profiles.data?.length ? <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{profiles.data.map((profile) => {
       const connection = requests.find((entry) => (entry.requesterId === profile.id && entry.recipientId === user?.id) || (entry.recipientId === profile.id && entry.requesterId === user?.id));
       const outgoing = connection?.requesterId === user?.id;
       const mentorRequest = mentorRequests.find((entry) => entry.senderId === user?.id && entry.recipientId === profile.id);
       return <Card key={profile.id}><CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3"><div><div className="grid h-11 w-11 place-items-center rounded-full bg-secondary text-base font-semibold text-primary">{profile.displayName.slice(0, 1).toUpperCase()}</div><h2 className="mt-4 font-semibold">{profile.displayName}</h2><p className="mt-1 text-sm text-muted-foreground">{profile.headline || 'Founder'}</p></div>{profile.stage && <Badge variant="outline" className="capitalize">{profile.stage}</Badge>}</div>
+        <div className="flex items-start justify-between gap-3"><div><div className="grid h-11 w-11 place-items-center rounded-full bg-secondary text-base font-semibold text-primary">{profile.displayName.slice(0, 1).toUpperCase()}</div><h2 className="mt-4 font-semibold">{profile.displayName}</h2><p className="mt-1 text-sm text-muted-foreground">{profile.headline || 'Founder'}</p></div><div className="flex flex-col gap-1.5">{profile.stage && <Badge variant="outline" className="capitalize">{profile.stage}</Badge>}{profile.lookingForCoFounder && <Badge variant="secondary">Looking for co-founder</Badge>}</div></div>
         <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{profile.bio || 'This founder has not added a bio yet.'}</p>
         <div className="mt-4 flex flex-wrap gap-1.5">{profile.skills.slice(0, 5).map((skill) => <Badge key={skill} variant="secondary">{skill}</Badge>)}</div>
         <div className="mt-4 space-y-1 text-xs text-muted-foreground">{profile.company && <p>{profile.company}</p>}{profile.location && <p>{profile.location}</p>}</div>
@@ -201,7 +234,7 @@ export function FoundersPage() {
         {profile.websiteUrl && <Button size="sm" variant="outline" asChild><a href={profile.websiteUrl} target="_blank" rel="noreferrer"><ArrowUpRight className="h-4 w-4" />Website</a></Button>}
         </div>
       </CardContent></Card>;
-    })}</div> : <EmptyState title={search ? 'No founders match that search' : 'A network grows one conversation at a time'} description={search ? 'Try a different name, company, or skill.' : 'There are no discoverable profiles to show right now. Complete your profile and choose to be discoverable.'} />}
+    })}</div> : <EmptyState title={hasFilters ? 'No founders match your filters' : 'A network grows one conversation at a time'} description={hasFilters ? 'Try adjusting your search or filters to find more founders.' : 'There are no discoverable profiles to show right now. Complete your profile and choose to be discoverable.'} />}
     <Card className="mt-6"><CardHeader><CardTitle className="text-base">Your connection requests</CardTitle><CardDescription>Incoming requests deserve a thoughtful response. Outgoing requests stay visible here.</CardDescription></CardHeader><CardContent>{requests.length ? <div className="divide-y">{requests.map((entry) => <div key={entry.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="text-sm font-medium">{entry.requesterId === user?.id ? `You requested ${entry.recipientName}` : `${entry.requesterName} wants to connect`}</p><p className="text-xs text-muted-foreground">{dateLabel(entry.createdAt)}</p></div><div className="flex items-center gap-2"><Badge variant={entry.status === 'accepted' ? 'secondary' : 'outline'} className="capitalize">{entry.status}</Badge>{(entry.requesterId === user?.id || entry.status !== 'pending') && <Button size="sm" variant="ghost" disabled={deleteConnection.isPending} onClick={() => deleteConnection.mutate({ connectionId: entry.id }, { onSuccess: refresh, onError: () => toast({ title: 'Could not remove connection', variant: 'destructive' }) })}>Remove</Button>}</div></div>)}</div> : <p className="text-sm text-muted-foreground">No connection requests yet.</p>}</CardContent></Card>
     <Dialog open={!!mentorshipProfile} onOpenChange={(open) => { if (!open) setMentorshipProfile(null); }}><DialogContent><DialogHeader><DialogTitle>Request mentorship</DialogTitle><DialogDescription>Send a direct, thoughtful request to {mentorshipProfile?.name}. Nothing is sent until you submit.</DialogDescription></DialogHeader><form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (!mentorshipProfile || !mentorshipMessage.trim()) return; createMentorshipRequest.mutate({ data: { recipientId: mentorshipProfile.id, message: mentorshipMessage.trim() } }, { onSuccess: () => { setMentorshipProfile(null); setMentorshipMessage(''); refresh(); toast({ title: 'Mentorship request sent' }); }, onError: () => toast({ title: 'Could not send mentorship request', variant: 'destructive' }) }); }}><label className="block space-y-2 text-sm font-medium">Your message<Textarea rows={5} maxLength={1000} minLength={1} required value={mentorshipMessage} onChange={(event) => setMentorshipMessage(event.target.value)} placeholder="Share what you are working on and what kind of perspective would help…" /></label><DialogFooter><Button type="button" variant="outline" onClick={() => setMentorshipProfile(null)}>Cancel</Button><Button type="submit" disabled={!mentorshipMessage.trim() || createMentorshipRequest.isPending}>{createMentorshipRequest.isPending ? 'Sending…' : 'Send request'}</Button></DialogFooter></form></DialogContent></Dialog>
   </div>;
@@ -228,6 +261,11 @@ export function PortfolioPage() {
     isDiscoverable: false
   });
   const [editing, setEditing] = useState(false);
+
+  const refresh = () => {
+    void client.invalidateQueries({ queryKey: getGetFounderProfileQueryKey() });
+    void client.invalidateQueries({ queryKey: getListMyAchievementsQueryKey() });
+  };
 
   // Initialize form with current profile data
   useEffect(() => {

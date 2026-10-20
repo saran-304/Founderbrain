@@ -666,6 +666,8 @@ export const searchFoundersQueryLimitMax = 50;
 export const SearchFoundersQueryParams = zod.object({
   "q": zod.coerce.string().max(searchFoundersQueryQMax).optional(),
   "skill": zod.coerce.string().max(searchFoundersQuerySkillMax).optional(),
+  "stage": zod.enum(['idea', 'bootstrapped', 'pre_seed', 'seed', 'series_a', 'series_b_plus', 'other']).optional(),
+  "lookingForCoFounder": zod.coerce.boolean().optional(),
   "limit": zod.coerce.number().int().min(1).max(searchFoundersQueryLimitMax).default(searchFoundersQueryLimitDefault)
 })
 
@@ -681,6 +683,11 @@ export const SearchFoundersResponseItem = zod.object({
   "websiteUrl": zod.string().url().nullable(),
   "isDiscoverable": zod.boolean(),
   "portfolioIsPublic": zod.boolean(),
+  "lookingForCoFounder": zod.boolean().nullish(),
+  "professionalInterests": zod.array(zod.string()).optional(),
+  "collaborationPreferences": zod.string().nullish(),
+  "preferredCollaborationSkills": zod.array(zod.string()).optional(),
+  "startupIdea": zod.string().nullish(),
   "updatedAt": zod.coerce.date()
 })
 export const SearchFoundersResponse = zod.array(SearchFoundersResponseItem)
@@ -701,6 +708,11 @@ export const GetFounderProfileResponse = zod.object({
   "websiteUrl": zod.string().url().nullable(),
   "isDiscoverable": zod.boolean(),
   "portfolioIsPublic": zod.boolean(),
+  "lookingForCoFounder": zod.boolean().nullish(),
+  "professionalInterests": zod.array(zod.string()).optional(),
+  "collaborationPreferences": zod.string().nullish(),
+  "preferredCollaborationSkills": zod.array(zod.string()).optional(),
+  "startupIdea": zod.string().nullish(),
   "updatedAt": zod.coerce.date()
 })
 
@@ -722,7 +734,8 @@ export const GetFounderPortfolioResponse = zod.object({
   "location": zod.string().nullable(),
   "company": zod.string().nullable(),
   "stage": zod.string().nullable(),
-  "websiteUrl": zod.string().url().nullable()
+  "websiteUrl": zod.string().url().nullable(),
+  "startupIdea": zod.string().nullable()
 }),
   "achievements": zod.array(zod.object({
   "id": zod.string().uuid(),
@@ -760,6 +773,18 @@ export const updateFounderProfileBodyCompanyMax = 120;
 
 export const updateFounderProfileBodyStageMax = 80;
 
+export const updateFounderProfileBodyProfessionalInterestsItemMax = 60;
+
+export const updateFounderProfileBodyProfessionalInterestsMax = 10;
+
+export const updateFounderProfileBodyCollaborationPreferencesMax = 500;
+
+export const updateFounderProfileBodyPreferredCollaborationSkillsItemMax = 40;
+
+export const updateFounderProfileBodyPreferredCollaborationSkillsMax = 10;
+
+export const updateFounderProfileBodyStartupIdeaMax = 500;
+
 
 
 export const UpdateFounderProfileBody = zod.object({
@@ -770,6 +795,11 @@ export const UpdateFounderProfileBody = zod.object({
   "location": zod.string().max(updateFounderProfileBodyLocationMax).nullish(),
   "company": zod.string().max(updateFounderProfileBodyCompanyMax).nullish(),
   "stage": zod.string().max(updateFounderProfileBodyStageMax).nullish(),
+  "lookingForCoFounder": zod.boolean().nullish(),
+  "professionalInterests": zod.array(zod.string().min(1).max(updateFounderProfileBodyProfessionalInterestsItemMax)).max(updateFounderProfileBodyProfessionalInterestsMax).optional(),
+  "collaborationPreferences": zod.string().max(updateFounderProfileBodyCollaborationPreferencesMax).nullish(),
+  "preferredCollaborationSkills": zod.array(zod.string().min(1).max(updateFounderProfileBodyPreferredCollaborationSkillsItemMax)).max(updateFounderProfileBodyPreferredCollaborationSkillsMax).optional(),
+  "startupIdea": zod.string().max(updateFounderProfileBodyStartupIdeaMax).nullish(),
   "websiteUrl": zod.string().url().nullish(),
   "isDiscoverable": zod.boolean().optional(),
   "portfolioIsPublic": zod.boolean().optional()
@@ -787,6 +817,11 @@ export const UpdateFounderProfileResponse = zod.object({
   "websiteUrl": zod.string().url().nullable(),
   "isDiscoverable": zod.boolean(),
   "portfolioIsPublic": zod.boolean(),
+  "lookingForCoFounder": zod.boolean().nullish(),
+  "professionalInterests": zod.array(zod.string()).optional(),
+  "collaborationPreferences": zod.string().nullish(),
+  "preferredCollaborationSkills": zod.array(zod.string()).optional(),
+  "startupIdea": zod.string().nullish(),
   "updatedAt": zod.coerce.date()
 })
 
@@ -1832,5 +1867,68 @@ export const UpdateUserSettingsResponse = zod.object({
   "mentorshipNotifications": zod.boolean(),
   "updatedAt": zod.coerce.date()
 })
+
+
+/**
+ * @summary List all conversations for the authenticated user
+ */
+export const ListConversationsResponseItem = zod.object({
+  "partnerId": zod.string().uuid(),
+  "partnerName": zod.string(),
+  "lastMessage": zod.string(),
+  "updatedAt": zod.coerce.date(),
+  "unreadCount": zod.number().int()
+})
+export const ListConversationsResponse = zod.array(ListConversationsResponseItem)
+
+
+/**
+ * @summary Send a message to a connected founder
+ */
+export const createMessageBodyContentMax = 50000;
+
+
+
+export const CreateMessageBody = zod.object({
+  "recipientId": zod.string().uuid(),
+  "content": zod.string().min(1).max(createMessageBodyContentMax)
+})
+
+export const CreateMessageResponse = zod.object({
+  "id": zod.string().uuid(),
+  "senderId": zod.string().uuid(),
+  "recipientId": zod.string().uuid(),
+  "content": zod.string(),
+  "readAt": zod.coerce.date().nullable(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Fetch conversation history with a specific founder
+ */
+export const ListMessagesParams = zod.object({
+  "recipientId": zod.coerce.string().uuid()
+})
+
+export const ListMessagesResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "senderId": zod.string().uuid(),
+  "recipientId": zod.string().uuid(),
+  "content": zod.string(),
+  "readAt": zod.coerce.date().nullable(),
+  "createdAt": zod.coerce.date()
+})
+export const ListMessagesResponse = zod.array(ListMessagesResponseItem)
+
+
+/**
+ * @summary Mark a message as read
+ */
+export const MarkMessageReadParams = zod.object({
+  "messageId": zod.coerce.string().uuid()
+})
+
+export const MarkMessageReadResponse = zod.void()
 
 

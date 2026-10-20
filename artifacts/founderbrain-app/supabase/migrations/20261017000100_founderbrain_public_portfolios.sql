@@ -17,7 +17,8 @@ as $$
       'location', profile.location,
       'company', profile.company,
       'stage', profile.stage,
-      'websiteUrl', profile.website_url
+      'websiteUrl', profile.website_url,
+      'startupIdea', profile.startup_idea
     ),
     'achievements', coalesce(
       (

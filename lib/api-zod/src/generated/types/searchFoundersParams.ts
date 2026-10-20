@@ -5,6 +5,7 @@
  * Authenticated Founderbrain workspace API
  * OpenAPI spec version: 0.1.0
  */
+import type { SearchFoundersStage } from './searchFoundersStage';
 
 export type SearchFoundersParams = {
 /**
@@ -15,6 +16,8 @@ q?: string;
  * @maxLength 60
  */
 skill?: string;
+stage?: SearchFoundersStage;
+lookingForCoFounder?: boolean;
 /**
  * @minimum 1
  * @maximum 50

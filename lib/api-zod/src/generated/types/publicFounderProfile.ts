@@ -22,4 +22,6 @@ export interface PublicFounderProfile {
   stage: string | null;
   /** @nullable */
   websiteUrl: string | null;
+  /** @nullable */
+  startupIdea: string | null;
 }

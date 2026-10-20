@@ -21,6 +21,11 @@ function toProfile(row: any) {
     websiteUrl: row.website_url,
     isDiscoverable: row.is_discoverable,
     portfolioIsPublic: row.portfolio_is_public,
+    lookingForCoFounder: row.looking_for_co_founder,
+    professionalInterests: row.professional_interests ?? [],
+    collaborationPreferences: row.collaboration_preferences,
+    preferredCollaborationSkills: row.preferred_collaboration_skills ?? [],
+    startupIdea: row.startup_idea,
     updatedAt: row.updated_at,
   };
 }
@@ -58,7 +63,7 @@ router.get('/founders', async (req, res): Promise<void> => {
 
   const { data, error } = await getRequestSupabase(req)
     .from('profiles')
-    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,updated_at')
+    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,looking_for_co_founder,professional_interests,collaboration_preferences,preferred_collaboration_skills,startup_idea,updated_at')
     .eq('is_discoverable', true)
     .order('updated_at', { ascending: false })
     .limit(200);
@@ -69,6 +74,8 @@ router.get('/founders', async (req, res): Promise<void> => {
 
   const q = parsed.data.q?.trim().toLocaleLowerCase();
   const skill = parsed.data.skill?.trim().toLocaleLowerCase();
+  const stage = parsed.data.stage;
+  const lookingForCoFounder = parsed.data.lookingForCoFounder;
   const founders = (data ?? [])
     .map(toProfile)
     .filter((profile) => {
@@ -79,9 +86,13 @@ router.get('/founders', async (req, res): Promise<void> => {
         profile.company ?? '',
         profile.location ?? '',
         ...(profile.skills ?? []),
+        ...(profile.professionalInterests ?? []),
+        profile.collaborationPreferences ?? '',
       ].join(' ').toLocaleLowerCase();
       return (!q || text.includes(q))
-        && (!skill || profile.skills.some((item: string) => item.toLocaleLowerCase().includes(skill)));
+        && (!skill || profile.skills.some((item: string) => item.toLocaleLowerCase().includes(skill)))
+        && (!stage || profile.stage === stage)
+        && (lookingForCoFounder === undefined || profile.lookingForCoFounder === lookingForCoFounder);
     })
     .slice(0, parsed.data.limit ?? 20);
 
@@ -92,7 +103,7 @@ router.get('/founders/me', async (req, res): Promise<void> => {
   const user = getRequestUser(req);
   const { data, error } = await getRequestSupabase(req)
     .from('profiles')
-    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,updated_at')
+    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,looking_for_co_founder,professional_interests,collaboration_preferences,preferred_collaboration_skills,startup_idea,updated_at')
     .eq('id', user.id)
     .maybeSingle();
   if (error) {
@@ -124,6 +135,11 @@ router.patch('/founders/me', async (req, res): Promise<void> => {
     websiteUrl: 'website_url',
     isDiscoverable: 'is_discoverable',
     portfolioIsPublic: 'portfolio_is_public',
+    lookingForCoFounder: 'looking_for_co_founder',
+    professionalInterests: 'professional_interests',
+    collaborationPreferences: 'collaboration_preferences',
+    preferredCollaborationSkills: 'preferred_collaboration_skills',
+    startupIdea: 'startup_idea',
   };
   for (const [key, column] of Object.entries(fields)) {
     if (body.data[key as keyof typeof body.data] !== undefined) {
@@ -140,7 +156,7 @@ router.patch('/founders/me', async (req, res): Promise<void> => {
     .from('profiles')
     .update(values)
     .eq('id', getRequestUser(req).id)
-    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,updated_at')
+    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,looking_for_co_founder,professional_interests,collaboration_preferences,preferred_collaboration_skills,startup_idea,updated_at')
     .maybeSingle();
   if (error) {
     sendSupabaseError(req, res, error, 'update founder profile');

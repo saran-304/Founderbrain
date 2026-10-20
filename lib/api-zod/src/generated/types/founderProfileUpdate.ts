@@ -44,6 +44,30 @@ export interface FounderProfileUpdate {
      */
   stage?: string | null;
   /** @nullable */
+  lookingForCoFounder?: boolean | null;
+  /**
+     * @maxItems 10
+     * @items.minLength 1
+     * @items.maxLength 60
+     */
+  professionalInterests?: string[];
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  collaborationPreferences?: string | null;
+  /**
+     * @maxItems 10
+     * @items.minLength 1
+     * @items.maxLength 40
+     */
+  preferredCollaborationSkills?: string[];
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  startupIdea?: string | null;
+  /** @nullable */
   websiteUrl?: string | null;
   isDiscoverable?: boolean;
   portfolioIsPublic?: boolean;

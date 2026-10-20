@@ -24,5 +24,13 @@ export interface FounderProfile {
   websiteUrl: string | null;
   isDiscoverable: boolean;
   portfolioIsPublic: boolean;
+  /** @nullable */
+  lookingForCoFounder?: boolean | null;
+  professionalInterests?: string[];
+  /** @nullable */
+  collaborationPreferences?: string | null;
+  preferredCollaborationSkills?: string[];
+  /** @nullable */
+  startupIdea?: string | null;
   updatedAt: Date;
 }

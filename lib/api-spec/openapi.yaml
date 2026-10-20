@@ -25,6 +25,7 @@ tags:
   - name: fundraising
   - name: notifications
   - name: settings
+  - name: messages
 security:
   - bearerAuth: []
 paths:
@@ -621,6 +622,17 @@ paths:
           schema:
             type: string
             maxLength: 60
+        - name: stage
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [idea, bootstrapped, pre_seed, seed, series_a, series_b_plus, other]
+        - name: lookingForCoFounder
+          in: query
+          required: false
+          schema:
+            type: boolean
         - name: limit
           in: query
           required: false
@@ -1592,6 +1604,79 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserSettings"
+  /messages:
+    get:
+      operationId: listConversations
+      tags: [messages]
+      summary: List all conversations for the authenticated user
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+    post:
+      operationId: createMessage
+      tags: [messages]
+      summary: Send a message to a connected founder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+  /messages/{recipientId}:
+    parameters:
+      - name: recipientId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listMessages
+      tags: [messages]
+      summary: Fetch conversation history with a specific founder
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+        "403":
+          description: Not connected to this founder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /messages/{messageId}/read:
+    parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: markMessageRead
+      tags: [messages]
+      summary: Mark a message as read
+      responses:
+        "204":
+          description: Message marked as read
 components:
   securitySchemes:
     bearerAuth:
@@ -2044,6 +2129,20 @@ components:
           type: boolean
         portfolioIsPublic:
           type: boolean
+        lookingForCoFounder:
+          type: ["boolean", "null"]
+        professionalInterests:
+          type: array
+          items:
+            type: string
+        collaborationPreferences:
+          type: ["string", "null"]
+        preferredCollaborationSkills:
+          type: array
+          items:
+            type: string
+        startupIdea:
+          type: ["string", "null"]
         updatedAt:
           type: string
           format: date-time
@@ -2083,7 +2182,9 @@ components:
         websiteUrl:
           type: ["string", "null"]
           format: uri
-      required: [id, displayName, headline, bio, skills, location, company, stage, websiteUrl]
+        startupIdea:
+          type: ["string", "null"]
+      required: [id, displayName, headline, bio, skills, location, company, stage, websiteUrl, startupIdea]
     FounderProfileUpdate:
       type: object
       minProperties: 1
@@ -2114,6 +2215,28 @@ components:
         stage:
           type: ["string", "null"]
           maxLength: 80
+        lookingForCoFounder:
+          type: ["boolean", "null"]
+        professionalInterests:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            minLength: 1
+            maxLength: 60
+        collaborationPreferences:
+          type: ["string", "null"]
+          maxLength: 500
+        preferredCollaborationSkills:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+        startupIdea:
+          type: ["string", "null"]
+          maxLength: 500
         websiteUrl:
           type: ["string", "null"]
           format: uri
@@ -2736,3 +2859,52 @@ components:
           type: boolean
         mentorshipNotifications:
           type: boolean
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+        recipientId:
+          type: string
+          format: uuid
+        content:
+          type: string
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, senderId, recipientId, content, readAt, createdAt]
+    MessageInput:
+      type: object
+      properties:
+        recipientId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+      required: [recipientId, content]
+    Conversation:
+      type: object
+      properties:
+        partnerId:
+          type: string
+          format: uuid
+        partnerName:
+          type: string
+        lastMessage:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        unreadCount:
+          type: integer
+      required: [partnerId, partnerName, lastMessage, updatedAt, unreadCount]

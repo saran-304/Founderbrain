@@ -92,6 +92,7 @@ function Router() {
         <Route path="/assistants"><Protected><AssistantsPage /></Protected></Route>
         <Route path="/fundraising"><Protected><FundraisingPage /></Protected></Route>
         <Route path="/notifications"><Protected><NotificationsPage /></Protected></Route>
+        <Route path="/messages/:recipientId"><Protected><MessagesPage /></Protected></Route>
         <Route path="/settings"><Protected><SettingsPage /></Protected></Route>
         <Route path="/about" component={AboutPage} />
         <Route component={NotFound} />

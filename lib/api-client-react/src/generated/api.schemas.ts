@@ -400,6 +400,14 @@ export interface FounderProfile {
   websiteUrl: string | null;
   isDiscoverable: boolean;
   portfolioIsPublic: boolean;
+  /** @nullable */
+  lookingForCoFounder?: boolean | null;
+  professionalInterests?: string[];
+  /** @nullable */
+  collaborationPreferences?: string | null;
+  preferredCollaborationSkills?: string[];
+  /** @nullable */
+  startupIdea?: string | null;
   updatedAt: string;
 }
 
@@ -419,6 +427,8 @@ export interface PublicFounderProfile {
   stage: string | null;
   /** @nullable */
   websiteUrl: string | null;
+  /** @nullable */
+  startupIdea: string | null;
 }
 
 export interface Achievement {
@@ -478,6 +488,30 @@ export interface FounderProfileUpdate {
      * @nullable
      */
   stage?: string | null;
+  /** @nullable */
+  lookingForCoFounder?: boolean | null;
+  /**
+     * @maxItems 10
+     * @items.minLength 1
+     * @items.maxLength 60
+     */
+  professionalInterests?: string[];
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  collaborationPreferences?: string | null;
+  /**
+     * @maxItems 10
+     * @items.minLength 1
+     * @items.maxLength 40
+     */
+  preferredCollaborationSkills?: string[];
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  startupIdea?: string | null;
   /** @nullable */
   websiteUrl?: string | null;
   isDiscoverable?: boolean;
@@ -1048,6 +1082,32 @@ export interface UserSettingsUpdate {
   mentorshipNotifications?: boolean;
 }
 
+export interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  content: string;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface MessageInput {
+  recipientId: string;
+  /**
+     * @minLength 1
+     * @maxLength 50000
+     */
+  content: string;
+}
+
+export interface Conversation {
+  partnerId: string;
+  partnerName: string;
+  lastMessage: string;
+  updatedAt: string;
+  unreadCount: number;
+}
+
 export type GetDashboardSummaryParams = {
 workspaceId: string;
 };
@@ -1084,12 +1144,27 @@ q?: string;
  * @maxLength 60
  */
 skill?: string;
+stage?: SearchFoundersStage;
+lookingForCoFounder?: boolean;
 /**
  * @minimum 1
  * @maximum 50
  */
 limit?: number;
 };
+
+export type SearchFoundersStage = typeof SearchFoundersStage[keyof typeof SearchFoundersStage];
+
+
+export const SearchFoundersStage = {
+  idea: 'idea',
+  bootstrapped: 'bootstrapped',
+  pre_seed: 'pre_seed',
+  seed: 'seed',
+  series_a: 'series_a',
+  series_b_plus: 'series_b_plus',
+  other: 'other',
+} as const;
 
 export type ListCommunityPostsParams = {
 /**
