@@ -30,6 +30,10 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
     try {
       if (mode === 'login') {
         await auth.signIn(email.trim(), password);
+        toast({
+          title: 'Welcome back',
+          description: 'You have been signed in successfully.',
+        });
         navigate('/dashboard');
       } else if (mode === 'signup') {
         const result = await auth.signUp(email.trim(), password, name.trim());
@@ -37,7 +41,13 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
           setConfirmationPending(true);
           setMessage('Check your inbox to confirm your email. You can sign in once your account is confirmed.');
         }
-        else navigate('/dashboard');
+        else {
+          toast({
+            title: 'Account created',
+            description: 'Your account has been created successfully.',
+          });
+          navigate('/dashboard');
+        }
       } else {
         await auth.requestPasswordReset(email.trim());
         setMessage('If an account exists for this address, a password reset link is on its way.');

@@ -59,9 +59,10 @@ export function AssistantsPage() {
     setProviderUnavailable(false);
     create.mutate({ data: { workspaceId, kind, prompt: prompt.trim() } }, {
       onSuccess: (run) => { setPrompt(''); setSelectedRun(run); refresh(); },
-      onError: () => {
+      onError: (error) => {
         setProviderUnavailable(true);
-        toast({ title: 'Assistant provider is not configured', description: 'Your prompt was not saved as a generated answer. Ask your workspace administrator to configure the provider.', variant: 'destructive' });
+        const errorMessage = error?.data?.error || error?.message || 'Your prompt was not saved as a generated answer.';
+        toast({ title: 'Assistant request failed', description: errorMessage, variant: 'destructive' });
       },
     });
   };

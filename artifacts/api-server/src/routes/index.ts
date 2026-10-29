@@ -2,10 +2,11 @@ import { Router, type IRouter } from "express";
 import { requireSupabaseUser } from "../middlewares/supabase-auth";
 import activityRouter from "./activity";
 import accountRouter from "./account";
-import assistantsRouter from "./assistants";
+import assistantsRouter, { publicAiHealthRouter } from "./assistants";
 import authRouter from "./auth";
 import communityRouter from "./community";
 import dashboardRouter from "./dashboard";
+import feedbackRouter, { publicFeedbackRouter } from "./feedback";
 import foundersRouter from "./founders";
 import fundraisingRouter from "./fundraising";
 import goalsRouter from "./goals";
@@ -22,6 +23,8 @@ const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(publicPortfolioRouter);
+router.use(publicFeedbackRouter);
+router.use(publicAiHealthRouter);
 router.use(requireSupabaseUser);
 router.use(authRouter);
 router.use(workspacesRouter);
@@ -39,5 +42,6 @@ router.use(messagesRouter);
 router.use(assistantsRouter);
 router.use(fundraisingRouter);
 router.use(accountRouter);
+router.use(feedbackRouter);
 
 export default router;

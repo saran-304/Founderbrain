@@ -548,6 +548,10 @@ export interface FounderMatch {
   explanation: string[];
 }
 
+export interface SaveFounderInput {
+  founderId: string;
+}
+
 export interface FounderConnectionInput {
   recipientId: string;
 }

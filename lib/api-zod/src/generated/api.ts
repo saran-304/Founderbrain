@@ -737,6 +737,51 @@ export const GetFounderMatchesResponse = zod.array(GetFounderMatchesResponseItem
 
 
 /**
+ * @summary List founders saved by the authenticated user
+ */
+export const ListSavedFoundersResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "displayName": zod.string(),
+  "headline": zod.string().nullable(),
+  "bio": zod.string().nullable(),
+  "skills": zod.array(zod.string()),
+  "location": zod.string().nullable(),
+  "company": zod.string().nullable(),
+  "stage": zod.string().nullable(),
+  "websiteUrl": zod.string().url().nullable(),
+  "isDiscoverable": zod.boolean(),
+  "portfolioIsPublic": zod.boolean(),
+  "lookingForCoFounder": zod.boolean().nullish(),
+  "professionalInterests": zod.array(zod.string()).optional(),
+  "collaborationPreferences": zod.string().nullish(),
+  "preferredCollaborationSkills": zod.array(zod.string()).optional(),
+  "startupIdea": zod.string().nullish(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListSavedFoundersResponse = zod.array(ListSavedFoundersResponseItem)
+
+
+/**
+ * @summary Save a founder to bookmarks
+ */
+export const SaveFounderBody = zod.object({
+  "founderId": zod.string().uuid()
+})
+
+export const SaveFounderResponse = zod.void()
+
+
+/**
+ * @summary Remove a founder from bookmarks
+ */
+export const UnsaveFounderParams = zod.object({
+  "founderId": zod.coerce.string().uuid()
+})
+
+export const UnsaveFounderResponse = zod.void()
+
+
+/**
  * @summary Get the authenticated founder's profile
  */
 export const GetFounderProfileResponse = zod.object({

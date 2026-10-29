@@ -31,12 +31,12 @@ export default function DashboardPage() {
   const summary = useGetDashboardSummary(params, { query: { enabled: !!workspaceId, queryKey: getGetDashboardSummaryQueryKey(params) } });
   const activity = useListRecentActivity({ workspaceId, limit: 6 }, { query: { enabled: !!workspaceId, queryKey: getListRecentActivityQueryKey({ workspaceId, limit: 6 }) } });
   const health = useHealthCheck();
-  if (workspacesLoading) return <LoadingBlock />;
+  if (workspacesLoading) return <LoadingBlock title="Loading your workspace" />;
   if (workspaceError) return <QueryError onRetry={() => void queryClient.invalidateQueries({ queryKey: getListWorkspacesQueryKey() })} />;
   if (workspaces?.length && !workspaceId) return <LoadingBlock title="Selecting your workspace" />;
   const greeting = (currentUser?.displayName || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Founder').split(' ')[0];
   if (!workspaceId) return <div className="mx-auto max-w-3xl pt-8"><PageHeading eyebrow="Your private workspace" title={`A clear start, ${greeting}.`} description="Create your workspace from the left navigation, then begin turning your goals into focused project work." /><EmptyState title="Your workspace starts here" description="Create a workspace from the sidebar to bring your projects, tasks, goals, and progress into one calm place." /></div>;
-  if (summary.isLoading) return <LoadingBlock />;
+  if (summary.isLoading) return <LoadingBlock title="Loading dashboard data" />;
   if (summary.isError || !summary.data) return <QueryError onRetry={() => void summary.refetch()} />;
   const data = summary.data;
   const progress = Math.max(0, Math.min(100, data.goalProgress ?? 0));

@@ -6,6 +6,8 @@ import { Toaster } from '@workspace/founderbrain-design-system/components/ui/toa
 import { TooltipProvider } from '@workspace/founderbrain-design-system/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import AuthPage from '@/pages/auth';
+import LandingPage from '@/pages/landing';
+import FeedbackPage from '@/pages/feedback';
 import { EmailVerificationCallbackPage, PasswordUpdatePage } from '@/pages/auth-return';
 import DashboardPage from '@/pages/dashboard';
 import SettingsPage from '@/pages/settings';
@@ -45,9 +47,11 @@ function Home() {
   const { user, isLoading, isConfigured } = useAuth();
   const [, navigate] = useLocation();
   useEffect(() => {
-    if (!isLoading) navigate(isConfigured && user ? '/dashboard' : '/login');
+    if (!isLoading && isConfigured && user) navigate('/dashboard');
   }, [isLoading, isConfigured, user, navigate]);
-  return null;
+  if (isLoading) return null;
+  if (isConfigured && user) return null;
+  return <LandingPage />;
 }
 
 function AuthRoute({ mode }: { mode: 'login' | 'signup' | 'forgot' }) {
@@ -95,6 +99,7 @@ function Router() {
         <Route path="/messages/:recipientId"><Protected><MessagesPage /></Protected></Route>
         <Route path="/settings"><Protected><SettingsPage /></Protected></Route>
         <Route path="/about" component={AboutPage} />
+        <Route path="/feedback" component={FeedbackPage} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

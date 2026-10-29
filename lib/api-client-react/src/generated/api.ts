@@ -84,6 +84,7 @@ import type {
   Project,
   ProjectInput,
   ProjectUpdate,
+  SaveFounderInput,
   SearchFoundersParams,
   Task,
   TaskInput,
@@ -2838,6 +2839,245 @@ export function useGetFounderMatches<TData = Awaited<ReturnType<typeof getFounde
 
 
 
+
+export const getListSavedFoundersUrl = () => {
+
+
+
+
+  return `/api/founders/saved`
+}
+
+/**
+ * @summary List founders saved by the authenticated user
+ */
+export const listSavedFounders = async ( options?: Parameters<typeof customFetch>[1]): Promise<FounderProfile[]> => {
+
+  return customFetch<FounderProfile[]>(getListSavedFoundersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSavedFoundersQueryKey = () => {
+    return [
+    `/api/founders/saved`
+    ] as const;
+    }
+
+
+export const getListSavedFoundersQueryOptions = <TData = Awaited<ReturnType<typeof listSavedFounders>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSavedFounders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSavedFoundersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSavedFounders>>> = ({ signal }) => listSavedFounders({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSavedFounders>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListSavedFoundersQueryResult = NonNullable<Awaited<ReturnType<typeof listSavedFounders>>>
+export type ListSavedFoundersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List founders saved by the authenticated user
+ */
+
+export function useListSavedFounders<TData = Awaited<ReturnType<typeof listSavedFounders>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSavedFounders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListSavedFoundersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSaveFounderUrl = () => {
+
+
+
+
+  return `/api/founders/saved`
+}
+
+/**
+ * @summary Save a founder to bookmarks
+ */
+export const saveFounder = async (saveFounderInput: SaveFounderInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getSaveFounderUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(saveFounderInput)
+  }
+);}
+
+
+
+
+
+export const getSaveFounderMutationKey = () => ['saveFounder'] as const;
+
+export const getSaveFounderMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveFounder>>, TError,SaveFounderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveFounder>>, TError,SaveFounderMutationVariables, TContext> => {
+
+const mutationKey = getSaveFounderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveFounder>>, SaveFounderMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  saveFounder(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveFounderMutationResult = NonNullable<Awaited<ReturnType<typeof saveFounder>>>
+    export type SaveFounderMutationBody = BodyType<SaveFounderInput>
+    export type SaveFounderMutationError = ErrorType<unknown>
+    export type SaveFounderMutationVariables = {data: BodyType<SaveFounderInput>}
+
+    /**
+ * @summary Save a founder to bookmarks
+ */
+export const useSaveFounder = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveFounder>>, TError,SaveFounderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveFounder>>,
+        TError,
+        SaveFounderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveFounderMutationOptions(options));
+    }
+
+export const getUnsaveFounderUrl = (founderId: string,) => {
+
+
+
+
+  return `/api/founders/saved/${founderId}`
+}
+
+/**
+ * @summary Remove a founder from bookmarks
+ */
+export const unsaveFounder = async (founderId: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getUnsaveFounderUrl(founderId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getUnsaveFounderMutationKey = () => ['unsaveFounder'] as const;
+
+export const getUnsaveFounderMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsaveFounder>>, TError,UnsaveFounderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unsaveFounder>>, TError,UnsaveFounderMutationVariables, TContext> => {
+
+const mutationKey = getUnsaveFounderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unsaveFounder>>, UnsaveFounderMutationVariables> = (props) => {
+          const {founderId} = props ?? {};
+
+          return  unsaveFounder(founderId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnsaveFounderMutationResult = NonNullable<Awaited<ReturnType<typeof unsaveFounder>>>
+
+    export type UnsaveFounderMutationError = ErrorType<unknown>
+    export type UnsaveFounderMutationVariables = {founderId: string}
+
+    /**
+ * @summary Remove a founder from bookmarks
+ */
+export const useUnsaveFounder = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsaveFounder>>, TError,UnsaveFounderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof unsaveFounder>>,
+        TError,
+        UnsaveFounderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUnsaveFounderMutationOptions(options));
+    }
 
 export const getGetFounderProfileUrl = () => {
 

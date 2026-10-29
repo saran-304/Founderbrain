@@ -35,7 +35,7 @@ async function getDisplayNames(req: Parameters<typeof getRequestSupabase>[0], id
   if (uniqueIds.length === 0) return new Map<string, string>();
   const { data, error } = await getRequestSupabase(req)
     .from('profiles')
-    .select('id,display_name')
+    .select('*')
     .in('id', uniqueIds);
   if (error) throw error;
   return new Map((data ?? []).map((profile) => [profile.id, profile.display_name || 'Founder']));
@@ -63,7 +63,7 @@ router.get('/founders', async (req, res): Promise<void> => {
 
   const { data, error } = await getRequestSupabase(req)
     .from('profiles')
-    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,looking_for_co_founder,professional_interests,collaboration_preferences,preferred_collaboration_skills,startup_idea,updated_at')
+    .select('*')
     .eq('is_discoverable', true)
     .order('updated_at', { ascending: false })
     .limit(200);
@@ -101,9 +101,10 @@ router.get('/founders', async (req, res): Promise<void> => {
 
 router.get('/founders/me', async (req, res): Promise<void> => {
   const user = getRequestUser(req);
+  // Try to select all columns, but gracefully handle missing columns
   const { data, error } = await getRequestSupabase(req)
     .from('profiles')
-    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,looking_for_co_founder,professional_interests,collaboration_preferences,preferred_collaboration_skills,startup_idea,updated_at')
+    .select('*')
     .eq('id', user.id)
     .maybeSingle();
   if (error) {
@@ -156,7 +157,7 @@ router.patch('/founders/me', async (req, res): Promise<void> => {
     .from('profiles')
     .update(values)
     .eq('id', getRequestUser(req).id)
-    .select('id,display_name,headline,bio,skills,location,company,stage,website_url,is_discoverable,portfolio_is_public,looking_for_co_founder,professional_interests,collaboration_preferences,preferred_collaboration_skills,startup_idea,updated_at')
+    .select('*')
     .maybeSingle();
   if (error) {
     sendSupabaseError(req, res, error, 'update founder profile');
@@ -431,6 +432,134 @@ router.get('/founders/matches', async (req, res): Promise<void> => {
     .slice(0, limit);
 
   res.json(api.GetFounderMatchesResponse.parse(matches));
+});
+
+// Saved founders endpoints
+router.get('/founders/saved', async (req, res): Promise<void> => {
+  const userId = getRequestUser(req).id;
+  const { data, error } = await getRequestSupabase(req)
+    .from('saved_founders')
+    .select('founder_id')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    sendSupabaseError(req, res, error, 'load saved founders');
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    res.json([]);
+    return;
+  }
+
+  const founderIds = data.map((item) => item.founder_id);
+  const { data: profiles, error: profilesError } = await getRequestSupabase(req)
+    .from('profiles')
+    .select('*')
+    .in('id', founderIds);
+
+  if (profilesError) {
+    sendSupabaseError(req, res, profilesError, 'load saved founder profiles');
+    return;
+  }
+
+  res.json(api.ListSavedFoundersResponse.parse((profiles ?? []).map(toProfile)));
+});
+
+router.post('/founders/saved', async (req, res): Promise<void> => {
+  const body = api.SaveFounderBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: 'A valid founderId is required.' });
+    return;
+  }
+
+  const userId = getRequestUser(req).id;
+  const founderId = body.data.founderId;
+
+  if (founderId === userId) {
+    res.status(400).json({ error: 'You cannot save yourself.' });
+    return;
+  }
+
+  // Check if founder exists and is discoverable
+  const { data: profile, error: profileError } = await getRequestSupabase(req)
+    .from('profiles')
+    .select('id,display_name,is_discoverable')
+    .eq('id', founderId)
+    .maybeSingle();
+
+  if (profileError) {
+    sendSupabaseError(req, res, profileError, 'check founder profile');
+    return;
+  }
+
+  if (!profile) {
+    res.status(404).json({ error: 'Founder profile not found.' });
+    return;
+  }
+
+  // Check if already saved
+  const { data: existing, error: existingError } = await getRequestSupabase(req)
+    .from('saved_founders')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('founder_id', founderId)
+    .maybeSingle();
+
+  if (existingError) {
+    sendSupabaseError(req, res, existingError, 'check existing saved founder');
+    return;
+  }
+
+  if (existing) {
+    res.status(409).json({ error: 'Founder already saved.' });
+    return;
+  }
+
+  const { data, error } = await getRequestSupabase(req)
+    .from('saved_founders')
+    .insert({ user_id: userId, founder_id: founderId })
+    .select('founder_id')
+    .single();
+
+  if (error) {
+    sendSupabaseError(req, res, error, 'save founder');
+    return;
+  }
+
+  res.status(201).end();
+});
+
+router.delete('/founders/saved/:founderId', async (req, res): Promise<void> => {
+  const params = api.UnsaveFounderParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: 'A valid founderId is required.' });
+    return;
+  }
+
+  const userId = getRequestUser(req).id;
+  const founderId = params.data.founderId;
+
+  const { data, error } = await getRequestSupabase(req)
+    .from('saved_founders')
+    .delete()
+    .eq('user_id', userId)
+    .eq('founder_id', founderId)
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    sendSupabaseError(req, res, error, 'unsave founder');
+    return;
+  }
+
+  if (!data) {
+    res.status(404).json({ error: 'Saved founder not found.' });
+    return;
+  }
+
+  res.status(204).end();
 });
 
 export default router;

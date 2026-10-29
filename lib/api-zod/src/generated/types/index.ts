@@ -91,6 +91,7 @@ export * from './projectInput';
 export * from './projectStatus';
 export * from './projectUpdate';
 export * from './publicFounderProfile';
+export * from './saveFounderInput';
 export * from './searchFoundersParams';
 export * from './searchFoundersStage';
 export * from './task';

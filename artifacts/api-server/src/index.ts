@@ -1,17 +1,17 @@
+import dotenv from "dotenv";
 import app from "./app";
 import { logger } from "./lib/logger";
 
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
+// Load environment variables from project root .env file for local development
+// In Vercel, environment variables are automatically available in process.env
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config({ path: "../../.env" });
 }
 
-const port = Number(rawPort);
+const rawPort = process.env["PORT"];
+const port = rawPort ? Number(rawPort) : 23608;
 
-if (Number.isNaN(port) || port <= 0) {
+if (rawPort && (Number.isNaN(port) || port <= 0)) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 

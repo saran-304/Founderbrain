@@ -700,7 +700,7 @@ paths:
       responses:
         "201":
           description: Founder saved
-  /founders/saved/:founderId:
+  /founders/saved/{founderId}:
     parameters:
       - name: founderId
         in: path
