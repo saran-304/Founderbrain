@@ -5,10 +5,7 @@
       "root": "artifacts/api-server",
       "framework": "express",
       "buildCommand": "pnpm run build",
-      "outputDirectory": "dist",
-      "environmentVariables": {
-        "NODE_ENV": "production"
-      }
+      "outputDirectory": "dist"
     },
     "founderbrain-app": {
       "root": "artifacts/founderbrain-app",
