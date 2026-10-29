@@ -139,6 +139,20 @@ router.patch('/investors/:investorId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'Enter valid investor updates.' });
     return;
   }
+  const { data: investorCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', params.data.investorId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'update investor record');
+    return;
+  }
+  if (!investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const patch: Record<string, unknown> = {};
   if (body.data.name !== undefined) patch.name = body.data.name.trim();
   if (body.data.organization !== undefined) patch.organization = body.data.organization?.trim() || null;
@@ -167,6 +181,20 @@ router.delete('/investors/:investorId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'A valid investorId is required.' });
     return;
   }
+  const { data: investorCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', params.data.investorId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'delete investor record');
+    return;
+  }
+  if (!investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const { data, error } = await getRequestSupabase(req)
     .from('investors')
     .delete()
@@ -190,6 +218,20 @@ router.get('/investors/:investorId/notes', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'A valid investorId is required.' });
     return;
   }
+  const { data: investorCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', params.data.investorId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'load investor notes');
+    return;
+  }
+  if (!investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const { data, error } = await getRequestSupabase(req)
     .from('investor_notes')
     .select('*')
@@ -232,6 +274,29 @@ router.patch('/investor-notes/:noteId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'Enter a valid investor note update.' });
     return;
   }
+  const { data: noteCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investor_notes')
+    .select('investor_id, author_id')
+    .eq('id', params.data.noteId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'update investor note');
+    return;
+  }
+  if (!noteCheck || noteCheck.author_id !== getRequestUser(req).id) {
+    res.status(404).json({ error: 'Investor note not found or you cannot edit it.' });
+    return;
+  }
+  const { data: investorCheck, error: investorError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', noteCheck.investor_id)
+    .maybeSingle();
+  if (investorError || !investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const { data, error } = await getRequestSupabase(req)
     .from('investor_notes')
     .update({ content: body.data.content.trim() })
@@ -256,6 +321,29 @@ router.delete('/investor-notes/:noteId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'A valid noteId is required.' });
     return;
   }
+  const { data: noteCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investor_notes')
+    .select('investor_id, author_id')
+    .eq('id', params.data.noteId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'delete investor note');
+    return;
+  }
+  if (!noteCheck || noteCheck.author_id !== getRequestUser(req).id) {
+    res.status(404).json({ error: 'Investor note not found or you cannot delete it.' });
+    return;
+  }
+  const { data: investorCheck, error: investorError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', noteCheck.investor_id)
+    .maybeSingle();
+  if (investorError || !investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const { data, error } = await getRequestSupabase(req)
     .from('investor_notes')
     .delete()
@@ -280,6 +368,20 @@ router.get('/investors/:investorId/follow-ups', async (req, res): Promise<void> 
     res.status(400).json({ error: 'A valid investorId is required.' });
     return;
   }
+  const { data: investorCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', params.data.investorId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'load investor follow-ups');
+    return;
+  }
+  if (!investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const { data, error } = await getRequestSupabase(req)
     .from('investor_follow_ups')
     .select('*')
@@ -323,6 +425,29 @@ router.patch('/investor-follow-ups/:followUpId', async (req, res): Promise<void>
     res.status(400).json({ error: 'Enter valid follow-up updates.' });
     return;
   }
+  const { data: followUpCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investor_follow_ups')
+    .select('investor_id')
+    .eq('id', params.data.followUpId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'update investor follow-up');
+    return;
+  }
+  if (!followUpCheck) {
+    res.status(404).json({ error: 'Follow-up not found.' });
+    return;
+  }
+  const { data: investorCheck, error: investorError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', followUpCheck.investor_id)
+    .maybeSingle();
+  if (investorError || !investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const patch: Record<string, unknown> = {};
   if (body.data.title !== undefined) patch.title = body.data.title.trim();
   if (body.data.dueDate !== undefined) patch.due_date = body.data.dueDate;
@@ -350,6 +475,29 @@ router.delete('/investor-follow-ups/:followUpId', async (req, res): Promise<void
     res.status(400).json({ error: 'A valid followUpId is required.' });
     return;
   }
+  const { data: followUpCheck, error: checkError } = await getRequestSupabase(req)
+    .from('investor_follow_ups')
+    .select('investor_id')
+    .eq('id', params.data.followUpId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'delete investor follow-up');
+    return;
+  }
+  if (!followUpCheck) {
+    res.status(404).json({ error: 'Follow-up not found.' });
+    return;
+  }
+  const { data: investorCheck, error: investorError } = await getRequestSupabase(req)
+    .from('investors')
+    .select('workspace_id')
+    .eq('id', followUpCheck.investor_id)
+    .maybeSingle();
+  if (investorError || !investorCheck) {
+    res.status(404).json({ error: 'Investor not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAdmin(req, res, investorCheck.workspace_id))) return;
   const { data, error } = await getRequestSupabase(req)
     .from('investor_follow_ups')
     .delete()

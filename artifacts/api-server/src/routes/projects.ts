@@ -87,6 +87,22 @@ router.get('/projects/:projectId', async (req, res): Promise<void> => {
     return;
   }
 
+  const { data: projectCheck, error: checkError } = await getRequestSupabase(req)
+    .from('projects')
+    .select('workspace_id')
+    .eq('id', parsed.data.projectId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'load project');
+    return;
+  }
+  if (!projectCheck) {
+    res.status(404).json({ error: 'Project not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, projectCheck.workspace_id))) return;
+
   const { data, error } = await getRequestSupabase(req)
     .from('projects')
     .select('*')
@@ -111,6 +127,22 @@ router.patch('/projects/:projectId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'Enter valid project updates.' });
     return;
   }
+
+  const { data: projectCheck, error: checkError } = await getRequestSupabase(req)
+    .from('projects')
+    .select('workspace_id')
+    .eq('id', params.data.projectId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'update project');
+    return;
+  }
+  if (!projectCheck) {
+    res.status(404).json({ error: 'Project not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, projectCheck.workspace_id))) return;
 
   const patch: Record<string, unknown> = {};
   if (parsed.data.name !== undefined) patch.name = parsed.data.name.trim();
@@ -142,6 +174,22 @@ router.delete('/projects/:projectId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'A valid projectId is required.' });
     return;
   }
+
+  const { data: projectCheck, error: checkError } = await getRequestSupabase(req)
+    .from('projects')
+    .select('workspace_id')
+    .eq('id', parsed.data.projectId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'delete project');
+    return;
+  }
+  if (!projectCheck) {
+    res.status(404).json({ error: 'Project not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, projectCheck.workspace_id))) return;
 
   const { data, error } = await getRequestSupabase(req)
     .from('projects')

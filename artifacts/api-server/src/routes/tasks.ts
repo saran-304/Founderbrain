@@ -95,6 +95,22 @@ router.get('/tasks/:taskId', async (req, res): Promise<void> => {
     return;
   }
 
+  const { data: taskCheck, error: checkError } = await getRequestSupabase(req)
+    .from('tasks')
+    .select('workspace_id')
+    .eq('id', parsed.data.taskId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'load task');
+    return;
+  }
+  if (!taskCheck) {
+    res.status(404).json({ error: 'Task not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, taskCheck.workspace_id))) return;
+
   const { data, error } = await getRequestSupabase(req)
     .from('tasks')
     .select('*')
@@ -119,6 +135,22 @@ router.patch('/tasks/:taskId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'Enter valid task updates.' });
     return;
   }
+
+  const { data: taskCheck, error: checkError } = await getRequestSupabase(req)
+    .from('tasks')
+    .select('workspace_id')
+    .eq('id', params.data.taskId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'update task');
+    return;
+  }
+  if (!taskCheck) {
+    res.status(404).json({ error: 'Task not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, taskCheck.workspace_id))) return;
 
   const patch: Record<string, unknown> = {};
   if (parsed.data.projectId !== undefined) patch.project_id = parsed.data.projectId;
@@ -153,6 +185,22 @@ router.delete('/tasks/:taskId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'A valid taskId is required.' });
     return;
   }
+
+  const { data: taskCheck, error: checkError } = await getRequestSupabase(req)
+    .from('tasks')
+    .select('workspace_id')
+    .eq('id', parsed.data.taskId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'delete task');
+    return;
+  }
+  if (!taskCheck) {
+    res.status(404).json({ error: 'Task not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, taskCheck.workspace_id))) return;
 
   const { data, error } = await getRequestSupabase(req)
     .from('tasks')

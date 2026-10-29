@@ -26,9 +26,10 @@ export async function requireWorkspaceAccess(
 ): Promise<boolean> {
   const supabase = getRequestSupabase(req);
   const { data, error } = await supabase
-    .from('workspaces')
-    .select('id')
-    .eq('id', workspaceId)
+    .from('workspace_members')
+    .select('role')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', getRequestUser(req).id)
     .maybeSingle();
 
   if (error) {
@@ -36,7 +37,7 @@ export async function requireWorkspaceAccess(
     return false;
   }
   if (!data) {
-    res.status(404).json({ error: 'Workspace not found.' });
+    res.status(403).json({ error: 'You do not have access to this workspace.' });
     return false;
   }
   return true;

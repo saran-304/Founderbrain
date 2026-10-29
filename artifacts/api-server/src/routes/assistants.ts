@@ -101,7 +101,7 @@ router.post('/assistants/runs', async (req, res): Promise<void> => {
 
   // Validate API key format (starts with AIza for standard keys, or is an auth key)
   if (!apiKey.startsWith('AIza') && !apiKey.startsWith('REDACTED_SECRET {
-    req.log.warn({ apiKeyFormat: apiKey.substring(0, 10) + '...' }, 'Invalid Gemini API key format');
+    req.log.warn({ keyType: apiKey.substring(0, 4) + '...' }, 'Invalid Gemini API key format');
     res.status(503).json({ error: 'Gemini API key has invalid format. Get a valid key from https://aistudio.google.com/apikey' });
     return;
   }

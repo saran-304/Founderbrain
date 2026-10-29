@@ -95,7 +95,7 @@ router.get('/goals/:goalId', async (req, res): Promise<void> => {
 
   const { data, error } = await getRequestSupabase(req)
     .from('goals')
-    .select('*')
+    .select('workspace_id')
     .eq('id', parsed.data.goalId)
     .maybeSingle();
 
@@ -107,7 +107,23 @@ router.get('/goals/:goalId', async (req, res): Promise<void> => {
     res.status(404).json({ error: 'Goal not found.' });
     return;
   }
-  res.json(GetGoalResponse.parse(toGoal(data)));
+  if (!(await requireWorkspaceAccess(req, res, data.workspace_id))) return;
+
+  const { data: goalData, error: goalError } = await getRequestSupabase(req)
+    .from('goals')
+    .select('*')
+    .eq('id', parsed.data.goalId)
+    .maybeSingle();
+
+  if (goalError) {
+    sendSupabaseError(req, res, goalError, 'load goal');
+    return;
+  }
+  if (!goalData) {
+    res.status(404).json({ error: 'Goal not found.' });
+    return;
+  }
+  res.json(GetGoalResponse.parse(toGoal(goalData)));
 });
 
 router.patch('/goals/:goalId', async (req, res): Promise<void> => {
@@ -117,6 +133,22 @@ router.patch('/goals/:goalId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'Enter valid goal updates.' });
     return;
   }
+
+  const { data: goalCheck, error: checkError } = await getRequestSupabase(req)
+    .from('goals')
+    .select('workspace_id')
+    .eq('id', params.data.goalId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'update goal');
+    return;
+  }
+  if (!goalCheck) {
+    res.status(404).json({ error: 'Goal not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, goalCheck.workspace_id))) return;
 
   const patch: Record<string, unknown> = {};
   if (parsed.data.title !== undefined) patch.title = parsed.data.title.trim();
@@ -151,6 +183,22 @@ router.delete('/goals/:goalId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'A valid goalId is required.' });
     return;
   }
+
+  const { data: goalCheck, error: checkError } = await getRequestSupabase(req)
+    .from('goals')
+    .select('workspace_id')
+    .eq('id', parsed.data.goalId)
+    .maybeSingle();
+
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'delete goal');
+    return;
+  }
+  if (!goalCheck) {
+    res.status(404).json({ error: 'Goal not found.' });
+    return;
+  }
+  if (!(await requireWorkspaceAccess(req, res, goalCheck.workspace_id))) return;
 
   const { data, error } = await getRequestSupabase(req)
     .from('goals')

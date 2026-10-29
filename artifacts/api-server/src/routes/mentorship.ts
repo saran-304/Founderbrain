@@ -319,6 +319,28 @@ router.put('/mentorship/answers/:answerId/accept', async (req, res): Promise<voi
     return;
   }
   const supabase = getRequestSupabase(req);
+  const { data: answerCheck, error: checkError } = await supabase
+    .from('mentorship_answers')
+    .select('question_id')
+    .eq('id', params.data.answerId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'accept mentorship answer');
+    return;
+  }
+  if (!answerCheck) {
+    res.status(404).json({ error: 'Answer not found.' });
+    return;
+  }
+  const { data: questionCheck, error: questionError } = await supabase
+    .from('mentorship_questions')
+    .select('author_id')
+    .eq('id', answerCheck.question_id)
+    .maybeSingle();
+  if (questionError || !questionCheck || questionCheck.author_id !== getRequestUser(req).id) {
+    res.status(403).json({ error: 'Only the question author can accept an answer.' });
+    return;
+  }
   const { error: acceptError } = await supabase.rpc('accept_mentorship_answer', {
     p_answer_id: params.data.answerId,
   });

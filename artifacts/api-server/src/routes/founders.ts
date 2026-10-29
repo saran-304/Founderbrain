@@ -301,6 +301,24 @@ router.delete('/connections/:connectionId', async (req, res): Promise<void> => {
     res.status(400).json({ error: 'A valid connectionId is required.' });
     return;
   }
+  const { data: connectionCheck, error: checkError } = await getRequestSupabase(req)
+    .from('founder_connections')
+    .select('requester_id, recipient_id')
+    .eq('id', params.data.connectionId)
+    .maybeSingle();
+  if (checkError) {
+    sendSupabaseError(req, res, checkError, 'delete founder connection');
+    return;
+  }
+  if (!connectionCheck) {
+    res.status(404).json({ error: 'Connection not found.' });
+    return;
+  }
+  const userId = getRequestUser(req).id;
+  if (connectionCheck.requester_id !== userId && connectionCheck.recipient_id !== userId) {
+    res.status(403).json({ error: 'You can only delete your own connections.' });
+    return;
+  }
   const { data, error } = await getRequestSupabase(req)
     .from('founder_connections')
     .delete()
