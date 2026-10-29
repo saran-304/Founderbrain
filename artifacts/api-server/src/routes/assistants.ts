@@ -1,4 +1,4 @@
-import { Router, type IRouter } from 'express';
+﻿import { Router, type IRouter } from 'express';
 import * as api from '@workspace/api-zod';
 import {
   getRequestSupabase,
@@ -100,12 +100,6 @@ router.post('/assistants/runs', async (req, res): Promise<void> => {
   }
 
   // Validate API key format (starts with AIza for standard keys, or is an auth key)
-  if (!apiKey.startsWith('AIza') && !apiKey.startsWith('REDACTED_SECRET {
-    req.log.warn({ keyType: apiKey.substring(0, 4) + '...' }, 'Invalid Gemini API key format');
-    res.status(503).json({ error: 'Gemini API key has invalid format. Get a valid key from https://aistudio.google.com/apikey' });
-    return;
-  }
-
   const supabase = getRequestSupabase(req);
   const userId = getRequestUser(req).id;
   const { count, error: countError } = await supabase
@@ -296,7 +290,7 @@ router.get('/assistants/health', async (req, res): Promise<void> => {
   const diagnostics = {
     configured: Boolean(apiKey),
     model: GEMINI_MODEL,
-    keyFormat: apiKey ? (apiKey.startsWith('AIza') ? 'standard' : apiKey.startsWith('REDACTED_SECRET ? 'authorization' : 'unknown') : 'none',
+    keyFormat: !apiKey ? 'none' : (apiKey.startsWith('AIza') ? 'standard' : 'other'),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     timeout: `${GEMINI_TIMEOUT_MS}ms`,
     maxRetries: MAX_RETRIES,
@@ -375,7 +369,7 @@ async function aiHealthCheck(req: any, res: any) {
   const diagnostics = {
     configured: Boolean(apiKey),
     model: GEMINI_MODEL,
-    keyFormat: apiKey ? (apiKey.startsWith('AIza') ? 'standard' : apiKey.startsWith('REDACTED_SECRET ? 'authorization' : 'unknown') : 'none',
+    keyFormat: !apiKey ? 'none' : (apiKey.startsWith('AIza') ? 'standard' : 'other'),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     timeout: `${GEMINI_TIMEOUT_MS}ms`,
     maxRetries: MAX_RETRIES,
