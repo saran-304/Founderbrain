@@ -13,8 +13,8 @@
    
    Copy the `.env` file values to `artifacts/founderbrain-app/.env` (already done):
    ```
-   VITE_SUPABASE_URL=https://xtsdzlmlqkgxqteimvsx.supabase.co
-   VITE_SUPABASE_ANON_KEY=sb_publishable_zioHVRaxRaq0cKo10L9cBg_Ymwbl0SG
+   VITE_SUPABASE_URL=your-supabase-project-url
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
    ```
 
 3. **Apply Database Migrations**

@@ -72,7 +72,7 @@ dotenv.config({ path: "../../.env" });
 5. Update your `.env` file with the valid key:
 
 ```bash
-GEMINI_API_KEY=AIzaSyDaGmWKa4JsXZ-HjGw7ISLn_3namBGewQe
+GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
 ### Verify Supabase Configuration
