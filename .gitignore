@@ -56,3 +56,8 @@ Thumbs.db
 .env.production.local
 
 .vercel
+
+# Local archives and backup copies
+*.backup
+*.bak
+attached_assets/*.zip
