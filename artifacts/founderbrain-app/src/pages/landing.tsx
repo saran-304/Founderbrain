@@ -1,10 +1,38 @@
 import { Link } from 'wouter';
-import { ArrowRight, CheckCircle2, Command, Rocket, Users, Target, Zap, Lock, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowRight, CheckCircle2, Command, Rocket, Users, Target, Zap, Lock, Mail, ShieldCheck, Sparkles, Menu, X } from 'lucide-react';
 import { Button } from '@workspace/founderbrain-design-system/components/ui/button';
 import { Card, CardContent } from '@workspace/founderbrain-design-system/components/ui/card';
 import { Badge } from '@workspace/founderbrain-design-system/components/ui/badge';
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Handle smooth scrolling for anchor links
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const element = document.querySelector(hash);
+        if (element) {
+          const headerOffset = 64; // Height of sticky header
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }
+    };
+
+    // Handle initial hash
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
   const features = [
     {
       icon: Target,
@@ -82,14 +110,75 @@ export default function LandingPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              Log in
-            </Link>
-            <Link href="/signup" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
-              Get Started
-            </Link>
+            <div className="hidden sm:flex items-center gap-3">
+              <Link href="/login" className="rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                Log in
+              </Link>
+              <Link href="/signup" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
+                Get Started
+              </Link>
+            </div>
+            <button
+              type="button"
+              className="md:hidden p-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border/70 bg-card/95 backdrop-blur-sm">
+            <nav className="px-5 py-4 space-y-4" aria-label="Mobile navigation">
+              <Link
+                href="#features"
+                className="block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </Link>
+              <Link
+                href="#how-it-works"
+                className="block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                How It Works
+              </Link>
+              <Link
+                href="/feedback"
+                className="block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Feedback
+              </Link>
+              <Link
+                href="/about"
+                className="block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <div className="pt-4 border-t border-border/70 space-y-3">
+                <Link
+                  href="/login"
+                  className="block w-full rounded-md px-4 py-2 text-sm font-medium text-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="block w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-center text-primary-foreground transition-opacity hover:opacity-90"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main>
@@ -398,9 +487,9 @@ export default function LandingPage() {
             <div>
               <h3 className="font-semibold mb-4">Community</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground">Founder Network</Link></li>
-                <li><Link href="/about" className="hover:text-foreground">Feedback Wall</Link></li>
-                <li><Link href="/about" className="hover:text-foreground">Mentorship</Link></li>
+                <li><Link href="/founders" className="hover:text-foreground">Founder Network</Link></li>
+                <li><Link href="/feedback" className="hover:text-foreground">Feedback Wall</Link></li>
+                <li><Link href="/mentorship" className="hover:text-foreground">Mentorship</Link></li>
               </ul>
             </div>
             <div>
